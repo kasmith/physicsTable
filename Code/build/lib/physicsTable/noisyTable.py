@@ -1,0 +1,115 @@
+#######################################
+#
+# For simulating forwards a SimpleTable with uncertainty
+#
+#######################################
+#
+#
+#
+
+from __future__ import division
+
+import sys,os
+from simpleTable import *
+import random
+import numpy as np
+import pygame as pg
+import pymunk as pm
+
+def velAngle(vx,vy):
+    ang = np.arctan2(vy,vx) % (np.pi * 2)
+    mag = np.sqrt(vx * vx + vy * vy)
+    return (ang,mag)
+
+class NoisyTable(SimpleTable):
+    
+    def __init__(self, dims, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, *args, **kwds):
+                     
+                     self.kapv = kapv
+                     self.kapb = kapb
+                     self.kapm = kapm
+                     self.perr = perr
+                     super(NoisyTable, self).__init__(dims, *args, **kwds)
+
+    
+    def jitter_ball(self, ball, kappa = None, posjitter = None):
+        if posjitter:
+            initpos = ball.getpos()
+            px = random.normalvariate(initpos[0],posjitter)
+            py = random.normalvariate(initpos[1],posjitter)
+            ball.setpos( (px, py) )
+        
+        if kappa:
+            v = ball.getvel()
+            vang, vmag = velAngle(v[0], v[1])
+            newang = np.random.vonmises(vang, kappa)
+            ball.setvel( (vmag * np.cos(newang), vmag * np.sin(newang)) )
+    
+    def on_wallhit(self, ball, wall):
+        self.jitter_ball(ball, self.kapb)
+    
+    def on_addball(self, ball):
+        self.jitter_ball(ball,self.kapv, self.perr)
+    
+    def on_step(self):
+        self.jitter_ball(self.balls, self.kapm)
+
+        
+def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS):
+    
+    ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+    ntab.set_timestep(table.basicts)
+    if table.balls: ntab.addBall(table.balls.getpos(), table.balls.getvel())
+    for w in table.walls: 
+        if isinstance(w, table.AbnormWall): ntab.addAbnormWall(w.poly.get_points(), w.col, w.poly.elasticity)
+        elif isinstance(w, table.Wall): ntab.addWall(w.r.topleft, w.r.bottomright,w.col, w.poly.elasticity)
+        
+    for o in table.occludes: ntab.addOcc(o.r.topleft, o.r.bottomright, o.col)
+    for g in table.goals: ntab.addGoal(g.r.topleft, g.r.bottomright, g.ret, g.col)
+    # Turn paddle into a special goal that returns paddlereturn (SUCCESS by default)
+    if table.paddle and paddlereturn:
+        e1, e2 = table.paddle.getendpts()
+        if table.paddle.dir == HORIZONTAL:
+            ul = (e1[0], e1[1] - table.paddle.width)
+            lr = (e2[0], e2[1] + table.paddle.width)
+        else:
+            ul = (e1[0] - table.paddle.width, e1[1])
+            lr = (e2[0] + table.paddle.width, e2[1])
+        ntab.addGoal(ul, lr, paddlereturn, LIGHTGREY)
+    return ntab
+
+if __name__ == '__main__':
+    pg.init()
+    screen = pg.display.set_mode((1000,600))
+    clock = pg.time.Clock()
+    running = True
+    table = SimpleTable((800,400))
+    table.addBall((100,100),(300,-300))
+    table.addWall((600,100),(700,300))
+    table.addOcc((100,50),(600,150))
+    table.addAbnormWall([(300,300),(300,400),(400,300),(400,200),(350,200)])
+    table.addGoal((700,300),(800,400),SUCCESS,RED)
+    table.addGoal((0,300),(100,400),SUCCESS, GREEN)
+    #noise = makeNoisy(table)
+    #noise.drawPath()
+    #pg.display.flip()
+    
+    #noise.demonstrate()
+    
+    while True:
+        print 'split\n'
+        noise = makeNoisy(table)
+        noise.set_timestep(1/100.)
+        noise.demonstrate()
+        #pg.display.flip()
+        
+        running = True
+        while running:
+            for e in pg.event.get():
+                if e.type == QUIT: pg.quit(); sys.exit(0)
+                elif e.type == KEYDOWN and e.key == K_ESCAPE: pg.quit(); sys.exit(0)
+                elif e.type == MOUSEBUTTONDOWN: running = False
+    
+    
+    
+    
