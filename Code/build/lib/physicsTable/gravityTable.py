@@ -137,27 +137,3 @@ class GravityTable(SimpleTable):
             ep = self.getendpts()
             pg.draw.line(screen, self.col, ep[0],ep[1],self.wid)
             
-
-def showballrot(tbl):
-    #tbl.balls.body.apply_force((-100.,0.),(0.,tbl.balls.getrad()))
-    print tbl.balls.getpos()
-
-if __name__ == '__main__':
-    pg.init()
-    xlim = 2500
-    screen = pg.display.set_mode((xlim,500))
-    while True:
-        spin = -20*random.random()
-        table = GravityTable((xlim,500))
-        table.addBall((100,100),(200,0),spin, rad = 30, elast = 1.)
-        table.addPaddle(0,500,xlim - 500,xlim)
-        table.addGoal((-100000,501),(2000,1000),FAILURE)
-        table.addGoal((-1000,-100),(-1,600),FAILURE)
-        table.addGoal((xlim+1,-100),(xlim+1000,600),FAILURE)
-        table.demonstrate(onclick = showballrot)
-        wait = True
-        while wait:
-            for e in pg.event.get():
-                if e.type == MOUSEBUTTONDOWN: wait = False
-                elif e.type == QUIT: running = False
-                elif e.type == KEYDOWN and e.key == K_ESCAPE: running = False

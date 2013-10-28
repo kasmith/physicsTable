@@ -61,8 +61,8 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
     ntab.set_timestep(table.basicts)
     if table.balls: ntab.addBall(table.balls.getpos(), table.balls.getvel())
     for w in table.walls: 
-        if isinstance(w, table.AbnormWall): ntab.addAbnormWall(w.poly.get_points(), w.col, w.poly.elasticity)
-        elif isinstance(w, table.Wall): ntab.addWall(w.r.topleft, w.r.bottomright,w.col, w.poly.elasticity)
+        if isinstance(w, AbnormWall): ntab.addAbnormWall(w.poly.get_points(), w.col, w.poly.elasticity)
+        elif isinstance(w, Wall): ntab.addWall(w.r.topleft, w.r.bottomright,w.col, w.poly.elasticity)
         
     for o in table.occludes: ntab.addOcc(o.r.topleft, o.r.bottomright, o.col)
     for g in table.goals: ntab.addGoal(g.r.topleft, g.r.bottomright, g.ret, g.col)
@@ -77,39 +77,6 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
             lr = (e2[0] + table.paddle.width, e2[1])
         ntab.addGoal(ul, lr, paddlereturn, LIGHTGREY)
     return ntab
-
-if __name__ == '__main__':
-    pg.init()
-    screen = pg.display.set_mode((1000,600))
-    clock = pg.time.Clock()
-    running = True
-    table = SimpleTable((800,400))
-    table.addBall((100,100),(300,-300))
-    table.addWall((600,100),(700,300))
-    table.addOcc((100,50),(600,150))
-    table.addAbnormWall([(300,300),(300,400),(400,300),(400,200),(350,200)])
-    table.addGoal((700,300),(800,400),SUCCESS,RED)
-    table.addGoal((0,300),(100,400),SUCCESS, GREEN)
-    #noise = makeNoisy(table)
-    #noise.drawPath()
-    #pg.display.flip()
-    
-    #noise.demonstrate()
-    
-    while True:
-        print 'split\n'
-        noise = makeNoisy(table)
-        noise.set_timestep(1/100.)
-        noise.demonstrate()
-        #pg.display.flip()
-        
-        running = True
-        while running:
-            for e in pg.event.get():
-                if e.type == QUIT: pg.quit(); sys.exit(0)
-                elif e.type == KEYDOWN and e.key == K_ESCAPE: pg.quit(); sys.exit(0)
-                elif e.type == MOUSEBUTTONDOWN: running = False
-    
     
     
     

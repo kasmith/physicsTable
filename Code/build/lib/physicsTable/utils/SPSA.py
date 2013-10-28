@@ -181,5 +181,5 @@ def test_spsa ( p_in, noise_var ):
     theta0 = np.random.rand(3)
     ( xsol, j_opt, niter ) = opti.minimise (theta0 )
     print xsol, j_opt, niter
-if __name__ == "__main__":
-    test_spsa ( [0.1, -2.6, -1.5], 0.3 )
+    
+    

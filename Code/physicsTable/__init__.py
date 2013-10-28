@@ -7,12 +7,12 @@
 
 __all__ = ['objects','SimpleTable','BasicTable','GravityTable','NoisyTable',
            'Path','PathFilter','PointSimulation','SimpleTrial','PongTrial',
-           'RedGreenTrial','loadTrial','constants']
+           'RedGreenTrial','loadTrial','constants','makeNoisy']
 
 from basicTable import BasicTable
 from simpleTable import SimpleTable
 from gravityTable import GravityTable
-from noisyTable import NoisyTable           
+from noisyTable import NoisyTable, makeNoisy        
 from pathFilter import Path, PathFilter
 from pointSimulation import PointSimulation
 from trials import SimpleTrial, PongTrial, RedGreenTrial, loadTrial

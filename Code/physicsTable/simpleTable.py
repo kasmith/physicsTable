@@ -15,6 +15,7 @@
 
 from __future__ import division
 from basicTable import *
+from .objects import *
 import time
 
 class SimpleTable(BasicTable):
@@ -34,7 +35,7 @@ class SimpleTable(BasicTable):
             self.sp.remove(self.balls.body)
         if rad is None: rad = self.dballrad
         if color is None: color = self.dballc
-        newball = self.Ball(initpos,initvel,rad,color,elast,pmsp)
+        newball = Ball(initpos,initvel,rad,color,elast,pmsp)
         self.sp.add(newball.body, newball.circle)
         self.on_addball(newball)
         self.balls = newball
@@ -134,50 +135,3 @@ class SimpleTable(BasicTable):
         return sc
             
     
-if __name__ == '__main__':
-    pg.init()
-    screen = pg.display.set_mode((1000,600))
-    clock = pg.time.Clock()
-    running = True
-    table = SimpleTable((800,400))
-    table.addBall((100,100),(300,-300))
-    table.addWall((600,100),(700,500))
-    table.addOcc((100,50),(600,150))
-    table.addGoal((0,300),(100,400),SUCCESS, RED)
-    print table.demonstrate()
-    #table.drawPath()
-    pg.display.flip()
-    '''
-    t = time.time()
-    tstep = 0
-    while running:
-        for e in pg.event.get():
-            if e.type == QUIT: running = False
-            elif e.type == KEYDOWN and e.key == K_ESCAPE: running = False
-            elif e.type == MOUSEBUTTONDOWN:
-                print table.balls.bounces, table.fullyOcc()
-
-        s = table.step()
-        tsc = table.draw()
-        #pg.display.flip()
-        table.fastUpdate()
-        clock.tick(50)
-        pg.display.set_caption('FPS: ' + str(clock.get_fps()))
-        
-        #if s == SUCCESS: running = False
-        tstep += 1
-        if tstep > 400: running = False
-    print time.time() - t
-    
-    
-    t = time.time()
-    for i in range(20000):
-        table.step()
-    print time.time() - t
-    '''
-    running = True
-    while running:
-        for e in pg.event.get():
-            if e.type == QUIT: running = False
-            elif e.type == KEYDOWN and e.key == K_ESCAPE: running = False
-    pg.quit()

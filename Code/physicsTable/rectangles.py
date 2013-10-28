@@ -91,6 +91,3 @@ def uniqueOccs(occs, walls = []):
             print uos
             raise Exception("FOUND COLLLISION!!!")
     return uos
-
-r = pg.Rect(300,300,600,200)
-b = pg.Rect(80, 180, 940, 140)

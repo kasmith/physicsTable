@@ -1,6 +1,8 @@
 from __future__ import division
 from physicsTable.constants import *
 import pygame as pg
+import pymunk as pm
+from weakref import ref
 
 __all__ = ['Ball', 'Wall','Occlusion','Goal','AbnormWall','Paddle']
 

@@ -34,7 +34,7 @@ def coll_func_ball_wall(space, arbiter, tableref):
     if tableref() is not None: tableref().coll_ball_wall(arbiter)
     
 def coll_func_ball_pad(space, arbiter, tableref):
-    if tableref() is not None: table().coll_ball_pad(arbiter)
+    if tableref() is not None: tableref().coll_ball_pad(arbiter)
 
 def euclid_dist(p1, p2, maxdist = None):
     dx = p2[0] - p1[0]
@@ -366,10 +366,12 @@ class BasicTable(object):
         waiting = True
         while self.step(timesteps) is None:
             stp += 1
+            fpsstr = "FPS: " + str(clk.get_fps())
             if retpath: rets.append([stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]])
             #screen.fill(WHITE)
             #screen.blit(self.draw(),offset)
             self.draw()
+            pg.display.set_caption(fpsstr)
             #pg.display.flip()
             self.fastUpdate()
             clk.tick(frrate)
