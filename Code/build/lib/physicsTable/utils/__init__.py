@@ -1,9 +1,11 @@
 
 
-__all__ = ['multimap', 'mvstdnormcdf', 'mvnormcdf', 'speedTest','simpleSPSA']
+__all__ = ['multimap', 'mvstdnormcdf', 'mvnormcdf', 'speedTest','simpleSPSA','displayInstructions','mousePos',
+           'FONT_L','FONT_M','FONT_S','FONT_VL']
            
 
 from EasyMultithread import multimap
 from mvncdf import mvstdnormcdf, mvnormcdf
 from speedTestPath import speedTest
 from SPSA import SimpleSPSA
+from pyText import *

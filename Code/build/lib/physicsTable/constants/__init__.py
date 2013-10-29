@@ -13,7 +13,7 @@ __all__ = ['WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOL
            'TIMEUP','SUCCESS','FAILURE','OUTOFBOUNDS','UNCERTAIN',
            'REDGOAL','GREENGOAL','BLUEGOAL','YELLOWGOAL',
            'COLLTYPE_DEFAULT','COLLTYPE_WALL','COLLTYPE_BALL','COLLTYPE_GOAL','COLLTYPE_PAD',
-           'SHAPE_RECT','SHAPE_BALL','SHAPE_POLY','getConst']
+           'SHAPE_RECT','SHAPE_BALL','SHAPE_POLY','getConst','CENTER']
 
 # Set color names
 WHITE = pg.Color('White')
@@ -39,7 +39,7 @@ KAPM_DEF = 212327.787
 PERR_DEF = 10.814
     
 def getConst(key):
-    constants = dict([(1,'LEFT'), (3,'RIGHT'), (2,'BOTTOM'), (4,'TOP'), (5,'HORIZONTAL'), (6,'VERTICAL'),
+    constants = dict([(1,'LEFT'), (3,'RIGHT'), (2,'BOTTOM'), (4,'TOP'), (5,'HORIZONTAL'), (6,'VERTICAL'),(7,'CENTER'),
                   (101,'TIMEUP'),(102,'SUCCESS'),(103,'FAILURE'),(104,'OUTOFBOUNDS'),(105,'UNCERTAIN'),
                   (201,'REDGOAL'),(202,'GREENGOAL'),(203,'BLUEGOAL'),(204,'YELLOWGOAL'),
                   (1000,'COLLTYPE_DEFAULT'),(1001,'COLLTYPE_WALL'),(1002,'COLLTYPE_BALL'),(1003,'COLTYPE_GOAL'),(1004,'COLLTYPE_PAD'),
@@ -54,6 +54,7 @@ BOTTOM = 2
 TOP = 4
 HORIZONTAL = 5
 VERTICAL = 6
+CENTER = 7
 
 # Constants for return
 TIMEUP = 101

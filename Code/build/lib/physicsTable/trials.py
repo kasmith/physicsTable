@@ -172,8 +172,9 @@ class SimpleTrial(object):
         return good
     
 
-    def save(self, flnm = None, askoverwrite = True):
+    def save(self, flnm = None, fldir = None, askoverwrite = True):
         if flnm is None: flnm = self.name + '.ptr'
+        if fldir is not None: flnm = os.path.join(fldir, flnm)
         if os.path.exists(flnm) and askoverwrite:
             asking = True
             while asking:
