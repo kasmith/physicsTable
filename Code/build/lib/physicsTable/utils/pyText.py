@@ -6,7 +6,9 @@ from __future__ import division
 import pygame as pg
 import time
 from pygame.locals import *
-from physicsTable.constants import LEFT, RIGHT, BOTTOM, TOP
+from physicsTable.constants import LEFT, RIGHT, BOTTOM, TOP, CENTER
+
+pg.font.init()
 
 # Constants
 FONT_L = pg.font.SysFont(None,48)
