@@ -91,6 +91,17 @@ def quitevent(quit_k = [K_LSHIFT,K_ESCAPE]):
             return False
     return True
 
+def screenPause(t = 0.5, keymove = True, clickmove = True):
+    time.sleep(t)
+    for e in pg.event.get(): pass
+    while True:
+        for e in pg.event.get():
+            if e.type == QUIT: return True
+            elif e.type == KEYDOWN:
+                if keymove and (e.key != K_ESCAPE and e.key != K_LSHIFT): return False
+                if quitevent(): return True
+            elif e.type == MOUSEBUTTONDOWN and clickmove: return False
+
 # Displays instruction text then waits for a keypress or mouse-click to move on (moving on can be disabled for each)
 # Returns True if a quit action is given, False if a move-on action is given
 def writeInstructions(text,screen,font = FONT_VL,txtcol = pg.Color('Black'),bkcol = pg.Color('White')):
@@ -116,17 +127,7 @@ def displayInstructions(text,screen,keymove = True,clickmove = True,font = FONT_
     writeInstructions(text,screen,font,txtcol,bkcol)
     pg.display.flip()
 
-    # Wait a second to ensure people don't just click through
-    time.sleep(.5)
-
-    # Wait for a move on signal
-    while True:
-        for e in pg.event.get():
-            if e.type == QUIT: return True
-            elif e.type == KEYDOWN:
-                if keymove and (e.key != K_ESCAPE and e.key != K_LSHIFT): return False
-                if quitevent(): return True
-            elif e.type == MOUSEBUTTONDOWN and clickmove: return False
+    return screenPause(0.5, keymove, clickmove)
 
 
 # Shows the mouse position in the upper-right corner of the screen

@@ -1,7 +1,7 @@
 
 
 __all__ = ['multimap', 'mvstdnormcdf', 'mvnormcdf', 'speedTest','simpleSPSA','displayInstructions','mousePos',
-           'FONT_L','FONT_M','FONT_S','FONT_VL']
+           'FONT_L','FONT_M','FONT_S','FONT_VL', 'screenPause']
            
 
 from EasyMultithread import multimap
