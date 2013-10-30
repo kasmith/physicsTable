@@ -84,7 +84,8 @@ class SimpleTable(BasicTable):
         return None
     
     def fastUpdate(self):
-        pg.display.update(self.balls.getboundrect())
+        r = self.balls.getrad()
+        pg.display.update(self.balls.getboundrect().move(self.soff[0],self.soff[1]).inflate(r,r))
         
     def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None,maxtime = None):
         tm = super(SimpleTable, self).demonstrate(screen, timesteps, retpath, onclick, maxtime)
