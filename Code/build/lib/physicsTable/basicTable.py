@@ -100,6 +100,7 @@ class BasicTable(object):
         
         # Make surface and objects
         dsurf = pg.display.get_surface()
+        self.soff = (0,0)
         if defscreen is None and dsurf is None: self.surface = pg.Surface(dims)
         else:
             if defscreen is None: defscreen = dsurf
@@ -108,6 +109,7 @@ class BasicTable(object):
                 xoff = int((bigdim[0] - dims[0]) / 2.)
                 yoff = int((bigdim[1] - dims[1]) / 2.)
                 soffset = (xoff,yoff)
+                self.soff = soffset
             thisrect = pg.Rect(soffset,dims)
             self.surface = defscreen.subsurface(thisrect)
         self.balls = []
@@ -340,9 +342,8 @@ class BasicTable(object):
         return (mp[0]-oset[0],mp[1]-oset[1])
         
     def fastUpdate(self):
-        # Partial update not working - just full fill for now
-        #pg.display.update([b.getboundrect().inflate(5,5) for b in self.balls])
-        pg.display.update(self.surface.get_rect())
+        pg.display.update([b.getboundrect().move(self.soff[0],self.soff[1]) for b in self.balls])
+        #pg.display.update(self.surface.get_rect())
         
     def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None):
         frrate = int(1 / timesteps)
