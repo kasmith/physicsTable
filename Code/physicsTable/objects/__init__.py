@@ -113,11 +113,11 @@ class AbnormWall(Wall):
         self.shapetype = SHAPE_POLY
         self.sp = ref(pmsp)
         
-    def draw(self,screen): pg.draw.polygon(screen,self.col,self.poly.get_points())
+    def draw(self,screen): pg.draw.polygon(screen,self.col,self.poly.get_vertices())
     
     def toStr(self):
         ret = "AbnormWall object - vertices: "
-        for v in self.polt.get_points():
+        for v in self.poly.get_vertices():
             ret += (v) + ", "
         return ret
     
@@ -169,8 +169,8 @@ class Paddle(object):
             self.pos = np
             if self.act:
                 pts = self.getendpts()
-                self.seg.a = pts[0]
-                self.seg.b = pts[1]
+                self.seg.unsafe_set_a(pts[0])
+                self.seg.unsafe_set_b(pts[1])
                 self.seg.cache_bb()
         
     def getendpts(self):

@@ -123,8 +123,8 @@ class GravityTable(SimpleTable):
             if y > (self.r.bottom - self.hlen): y = self.r.bottom - self.hlen
             self.p = (x,y)
             ep = self.getendpts()
-            self.seg.a = ep[0]
-            self.seg.b = ep[1]
+            self.seg.unsafe_set_a(ep[0])
+            self.seg.unsafe_set_b(ep[1])
             self.seg.cache_bb()
             
         def getendpts(self):
