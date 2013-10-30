@@ -86,8 +86,8 @@ class SimpleTable(BasicTable):
     def fastUpdate(self):
         pg.display.update(self.balls.getboundrect())
         
-    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None):
-        tm = super(SimpleTable, self).demonstrate(screen, timesteps, retpath, onclick)
+    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None,maxtime = None):
+        tm = super(SimpleTable, self).demonstrate(screen, timesteps, retpath, onclick, maxtime)
         p = self.balls.getpos()
         if retpath: return [p, tm[0], tm[1]]
         else: return [p, tm]
