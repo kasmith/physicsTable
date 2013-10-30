@@ -100,7 +100,8 @@ class BasicTable(object):
         
         # Make surface and objects
         dsurf = pg.display.get_surface()
-        self.soff = (0,0)
+        if soffset is not None: self.soff = soffset
+        else: self.soff = (0,0)
         if defscreen is None and dsurf is None: self.surface = pg.Surface(dims)
         else:
             if defscreen is None: defscreen = dsurf
@@ -343,7 +344,7 @@ class BasicTable(object):
         
     def fastUpdate(self):
         pg.display.update([b.getboundrect().move(self.soff[0],self.soff[1]) for b in self.balls])
-        #pg.display.update(self.surface.get_rect())
+        #pg.display.update(self.surface.get_rect().move(self.soff[0],self.soff[1]))
         
     def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None):
         frrate = int(1 / timesteps)
