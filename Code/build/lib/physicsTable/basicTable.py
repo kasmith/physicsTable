@@ -340,7 +340,9 @@ class BasicTable(object):
         return (mp[0]-oset[0],mp[1]-oset[1])
         
     def fastUpdate(self):
-        pg.display.update([b.getboundrect().inflate(5,5) for b in self.balls])
+        # Partial update not working - just full fill for now
+        #pg.display.update([b.getboundrect().inflate(5,5) for b in self.balls])
+        pg.display.update(self.surface.get_rect())
         
     def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None):
         frrate = int(1 / timesteps)
