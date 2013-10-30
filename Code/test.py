@@ -10,11 +10,11 @@ if __name__ == '__main__':
     
     args = sys.argv
     if len(args) != 2:
-        print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER'
+        print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER, LIMTIME'
         sys.exit(0)
     
-    if not args[1] in ['BASIC','NOISY','GRAVITY','SPEED','PATHFILTER']:
-        print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER'
+    if not args[1] in ['BASIC','NOISY','GRAVITY','SPEED','PATHFILTER', 'LIMTIME']:
+        print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER, LIMTIME'
         sys.exit(0)
         
     
@@ -31,6 +31,16 @@ if __name__ == '__main__':
         table.addOcc((100,50),(600,150))
         table.addGoal((0,300),(100,400),SUCCESS, RED)
         print table.demonstrate()
+        
+    if args[1] == 'LIMTIME':
+        screen = pg.display.set_mode((1000,600))
+        clock = pg.time.Clock()
+        running = True
+        table = BasicTable((800,400),soffset = (100,100))
+        table.addBall((100,100),(300,-300))
+        table.addWall((600,100),(700,300))
+        table.addOcc((100,50),(600,150))
+        print table.demonstrate(maxtime = 5)
         
     elif args[1] == 'SPEED':
         screen = pg.display.set_mode((1000,600))

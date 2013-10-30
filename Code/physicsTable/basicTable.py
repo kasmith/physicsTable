@@ -342,8 +342,11 @@ class BasicTable(object):
     def fastUpdate(self):
         pg.display.update([b.getboundrect() for b in self.balls])
         
-    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None):
+    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None):
         frrate = int(1 / timesteps)
+        if maxtime is not None: maxsteps = int(frrate * maxtime)
+        else: maxsteps = 99999999999
+        
         if screen is None:
             screen = pg.display.get_surface()
             
@@ -363,8 +366,9 @@ class BasicTable(object):
                 elif event.type == MOUSEBUTTONDOWN: waiting = False
         
         clk = pg.time.Clock()
-        waiting = True
-        while self.step(timesteps) is None:
+        running = True
+        while running:
+            if self.step(timesteps) is not None: running = False
             stp += 1
             fpsstr = "FPS: " + str(clk.get_fps())
             if retpath: rets.append([stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]])
@@ -380,11 +384,13 @@ class BasicTable(object):
                 elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
                 elif event.type == MOUSEBUTTONDOWN and onclick:
                     onclick(self)
+            if stp == maxsteps: running = False
         
         #if self.mostlyOcc(): return False
         self.draw()
         pg.display.flip()
         
+        waiting = True
         while waiting:
             for event in pg.event.get():
                 if event.type == QUIT: sys.exit(0)
