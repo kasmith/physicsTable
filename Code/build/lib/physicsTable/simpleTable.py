@@ -83,9 +83,9 @@ class SimpleTable(BasicTable):
             if ball_rect_collision(self.balls,g.r): return g.ret
         return None
     
-    def fastUpdate(self):
-        r = self.balls.getrad()
-        pg.display.update(self.balls.getboundrect().move(self.soff[0],self.soff[1]).inflate(r,r))
+    #def fastUpdate(self):
+    #    r = self.balls.getrad()
+    #    pg.display.update(self.balls.getboundrect().move(self.soff[0],self.soff[1]).inflate(r,r))
         
     def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None,maxtime = None):
         tm = super(SimpleTable, self).demonstrate(screen, timesteps, retpath, onclick, maxtime)

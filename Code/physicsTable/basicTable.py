@@ -345,8 +345,8 @@ class BasicTable(object):
     def fastUpdate(self):
         # Not a fast update... just flips
         #pg.display.update([b.getboundrect().move(self.soff[0],self.soff[1]).inflate(b.getrad(),b.getrad()) for b in self.balls])
-        #pg.display.update(self.surface.get_rect().move(self.soff[0],self.soff[1]))
-        pg.display.update()
+        pg.display.update(self.surface.get_rect().move(self.soff[0],self.soff[1]))
+        #pg.display.update()
         
     def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None):
         frrate = int(1 / timesteps)
