@@ -96,7 +96,7 @@ class SimpleSPSA ( object ):
                 # Funcion values associated with ``theta_plus`` and 
                 #``theta_minus``
                 
-                print theta_plus, theta_minus
+                #print theta_plus, theta_minus
                 j_plus = self.calc_loss ( theta_plus )
                 j_minus = self.calc_loss ( theta_minus )
                 # Estimate the gradient

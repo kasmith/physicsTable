@@ -90,8 +90,14 @@ class BasicTable(object):
         self.dpadlen = def_pad_len
         self.act = active
         
-        # Make the pymunk space
+        # Make the pymunk space (& sink output)
+        _stderr = sys.stderr
+        _stdout = sys.stdout
+        nullout = open(os.devnull,'wb')
+        sys.stderr = sys.stdout = nullout
         self.sp = pm.Space(10)
+        sys.stderr = _stderr
+        sys.stdout = _stdout
         self.sp.gravity = pm.Vec2d(0.,0.)
         stb = self.sp.static_body
         self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_BALL, None, None, None, coll_func_ball_ball, tableref = ref(self))
@@ -279,7 +285,7 @@ class BasicTable(object):
         if self.paddle.act: self.paddle.deactivate(self.sp)
         else: self.paddle.activate(self.sp, self.getRelativeMousePos())
         
-    def draw(self, simpaths = None, stillshow = False):
+    def draw(self, stillshow = False):
         self.surface.fill(self.bk_c)
         
         if not stillshow:
@@ -377,7 +383,7 @@ class BasicTable(object):
             if self.step(timesteps) is not None: running = False
             stp += 1
             fpsstr = "FPS: " + str(clk.get_fps())
-            if retpath: rets.append([stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]])
+            #if retpath: rets.append([stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]])
             #screen.fill(WHITE)
             #screen.blit(self.draw(),offset)
             self.draw()
@@ -403,7 +409,7 @@ class BasicTable(object):
                 elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
                 elif event.type == MOUSEBUTTONDOWN: waiting = False
         
-        if retpath: return [self.tm, rets]
+        #if retpath: return [self.tm, rets]
         return self.tm
     
     def makeMovie(self, moviename, outputdir = '.', fps = 20, removeframes = True, maxtime = None):

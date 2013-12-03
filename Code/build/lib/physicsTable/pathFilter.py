@@ -148,15 +148,17 @@ class PathFilter(object):
         return map(lambda p: p.getpos(self.t), self.particles)
     
     def getDecision(self, ps = None):
-        decs = map(lambda p: p.getdecision(self.t, self.timelim), self.particles)
+        decs = map(lambda p: p.getdecision(self.t, self.tlim), self.particles)
         if ps is None: ps = self.getPartPs()
         
         decps = dict([(tp,0.) for tp in self.endconds])
+        totp = 0
         for d, p in zip(decs, ps):
             decps[d] += p
+            totp += p
             
         for k in decps.keys():
-            if decps[k] > self.sure: return k
+            if (decps[k]/totp) > self.sure: return k
         
         return UNCERTAIN
     
