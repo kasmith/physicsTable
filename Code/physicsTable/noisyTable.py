@@ -52,7 +52,7 @@ class NoisyTable(SimpleTable):
         self.jitter_ball(ball,self.kapv, self.perr)
     
     def on_step(self):
-        self.jitter_ball(self.balls, self.kapm)
+        if self.balls is not None: self.jitter_ball(self.balls, self.kapm)
 
         
 def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS):

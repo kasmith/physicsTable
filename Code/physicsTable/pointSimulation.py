@@ -11,7 +11,7 @@ import numpy as np
 
 class PointSimulation(object):
     
-    def __init__(self,table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, ensure_end = False, nsims = 200, maxtime = 50., cpus = cpu_count()):
+    def __init__(self,table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, ensure_end = False, nsims = 200, maxtime = 50., cpus = cpu_count(), timeres = 0.05):
         self.tab = table
         self.kapv = kapv
         self.kapb = kapb
@@ -19,6 +19,7 @@ class PointSimulation(object):
         self.perr = perr
         self.maxtime = maxtime
         self.nsims = nsims
+        self.ts = timeres
         
         self.outcomes = None
         self.endpts = None
@@ -31,6 +32,7 @@ class PointSimulation(object):
     
     def singleSim(self, i):
         n = makeNoisy(self.tab,self.kapv,self.kapb,self.kapm,self.perr)
+        n.set_timestep(self.ts)
         r = n.simulate(self.maxtime)
         p = n.balls.getpos()
         rp = (p[0],p[1])
