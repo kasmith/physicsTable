@@ -35,9 +35,15 @@ class NoisyTable(SimpleTable):
     def jitter_ball(self, ball, kappa = None, posjitter = None):
         if posjitter:
             initpos = ball.getpos()
-            px = random.normalvariate(initpos[0],posjitter)
-            py = random.normalvariate(initpos[1],posjitter)
-            ball.setpos( (px, py) )
+            rad = ball.getrad()
+            xdim, ydim = self.dim
+            setting = True
+            while setting:
+                px = random.normalvariate(initpos[0],posjitter)
+                py = random.normalvariate(initpos[1],posjitter)
+                if px > rad and py > rad and px < (xdim - rad) and py < (ydim - rad):
+                    ball.setpos( (px, py) )
+                    setting = False
         
         if kappa:
             v = ball.getvel()
