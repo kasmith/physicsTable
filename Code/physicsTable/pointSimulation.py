@@ -8,14 +8,13 @@ from noisyTable import *
 from .utils.EasyMultithread import *
 import numpy as np
 
-
 class PointSimulation(object):
     
     def __init__(self,table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, ensure_end = False, nsims = 200, maxtime = 50., cpus = cpu_count(), timeres = 0.05):
         self.tab = table
         self.kapv = kapv
         self.kapb = kapb
-        self.kapm = kapm
+        self.kapm = kapm / np.sqrt(timeres / 0.001) # Correction for the fact that we're simulating fewer steps and thus jitter must be noisier (by approx sqrt of number of steps)
         self.perr = perr
         self.maxtime = maxtime
         self.nsims = nsims

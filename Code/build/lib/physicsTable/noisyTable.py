@@ -31,6 +31,8 @@ class NoisyTable(SimpleTable):
                      self.perr = perr
                      super(NoisyTable, self).__init__(dims, *args, **kwds)
 
+    def __del__(self):
+        super(NoisyTable,self).__del__()
     
     def jitter_ball(self, ball, kappa = None, posjitter = None):
         if posjitter:
