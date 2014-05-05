@@ -1,6 +1,6 @@
 
 
-__all__ = ['multimap', 'mvstdnormcdf', 'mvnormcdf', 'speedTest','simpleSPSA','displayInstructions','mousePos',
+__all__ = ['multimap', 'mvstdnormcdf', 'mvnormcdf', 'speedTest','SimpleSPSA','displayInstructions','mousePos',
            'FONT_L','FONT_M','FONT_S','FONT_VL', 'screenPause']
            
 
