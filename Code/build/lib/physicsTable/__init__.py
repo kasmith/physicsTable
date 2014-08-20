@@ -7,7 +7,7 @@
 
 __all__ = ['objects','SimpleTable','BasicTable','GravityTable','NoisyTable',
            'Path','PathFilter','PointSimulation','SimpleTrial','PongTrial',
-           'RedGreenTrial','loadTrial','constants','makeNoisy']
+           'RedGreenTrial','loadTrial','constants','makeNoisy','startRGCreator']
 
 from basicTable import BasicTable
 from simpleTable import SimpleTable
@@ -19,3 +19,13 @@ from trials import SimpleTrial, PongTrial, RedGreenTrial, loadTrial
 
 import objects
 import constants
+import creator
+
+def startRGCreator(tbsize = (900,900), flnm = None):
+    cr = creator.RGCreator(tbsize)
+    if flnm is not None:
+        isgood = cr.load(flnm)
+        if not isgood:
+            print "Error loading trial - default creator will be loaded"
+            cr = creator.RGCreator(tbsize)
+    cr.runCreator()

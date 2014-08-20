@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name = 'PhysicsTable',
-      version = '0.14',
+      version = '0.2',
       description = '2-D physics tables for intuitive physics psychology experiments',
       author = 'Kevin A Smith',
       author_email = 'k2smith@ucsd.edu',
