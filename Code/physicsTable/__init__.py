@@ -7,7 +7,7 @@
 
 __all__ = ['objects','SimpleTable','BasicTable','GravityTable','NoisyTable',
            'Path','PathFilter','PointSimulation','SimpleTrial','PongTrial',
-           'RedGreenTrial','loadTrial','constants','makeNoisy','startRGCreator']
+           'RedGreenTrial','loadTrial','constants','makeNoisy','startRGCreator','creator']
 
 from basicTable import BasicTable
 from simpleTable import SimpleTable
