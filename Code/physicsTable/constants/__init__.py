@@ -7,7 +7,7 @@
 
 import pygame as pg
 
-__all__ = ['WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD',
+__all__ = ['WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE',
            'TIMESTEP','DEACT_TIME','KAPV_DEF','KAPB_DEF','KAPM_DEF','PERR_DEF',
            'LEFT','RIGHT','BOTTOM','TOP','HORIZONTAL','VERTICAL',
            'TIMEUP','SUCCESS','FAILURE','OUTOFBOUNDS','UNCERTAIN',
@@ -25,6 +25,7 @@ GREY = pg.Color('Grey')
 LIGHTGREY = pg.Color('lightgrey')
 YELLOW = pg.Color('Yellow')
 GOLD = pg.Color('Gold')
+PURPLE = pg.Color('Purple')
 
 # Lenght of timestep
 TIMESTEP = 1/1000.

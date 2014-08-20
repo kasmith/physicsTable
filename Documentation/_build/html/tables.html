@@ -1,0 +1,459 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. Tables &mdash; PhysicsTables 0.12 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.12',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PhysicsTables 0.12 documentation" href="index.html" />
+    <link rel="next" title="3. Objects" href="objects.html" />
+    <link rel="prev" title="1. Introduction" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="objects.html" title="3. Objects"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="1. Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PhysicsTables 0.12 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tables">
+<h1>2. Tables<a class="headerlink" href="#tables" title="Permalink to this headline">¶</a></h1>
+<p>Tables come in four different flavors:</p>
+<ol class="arabic simple">
+<li><a class="reference internal" href="#basic-table"><em>BasicTables</em></a> allow for any combination of objects and unfold deterministically</li>
+<li><a class="reference internal" href="#simpletable"><em>SimpleTables</em></a> are like BasicTables but allow only one ball at a time</li>
+<li><a class="reference internal" href="#noisy-table"><em>NoisyTables</em></a> are SimpleTables that utilize stochastic physics from Smith &amp; Vul (2013)</li>
+<li><a class="reference internal" href="#gravity-table"><em>GravityTables</em></a> are SimpleTables in which objects fall towards the bottom</li>
+</ol>
+<div class="section" id="basictable">
+<span id="basic-table"></span><h2>2.1. BasicTable<a class="headerlink" href="#basictable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BasicTable">
+<em class="property">class </em><tt class="descname">BasicTable</tt><big>(</big><em>dims</em>, <em>closed_ends</em>, <em>background_cl</em>, <em>def_ball_rad</em>, <em>def_ball_cl</em>, <em>def_pad_len</em>, <em>def_wall_cl</em>, <em>def_occ_cl</em>, <em>def_pad_cl</em>, <em>active</em>, <em>soffset</em>, <em>defscreen</em><big>)</big><a class="headerlink" href="#BasicTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes and returns a BasicTable object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dims</strong> &#8211; A tuple (x,y) of table dimensions in pixels</li>
+<li><strong>closed_ends</strong> &#8211; A list of direction constants to determine which sides of the table should be walled off. Defaults to <tt class="docutils literal"><span class="pre">[LEFT,</span> <span class="pre">RIGHT,</span> <span class="pre">BOTTOM,</span> <span class="pre">TOP]</span></tt></li>
+<li><strong>background_cl</strong> &#8211; Color of the table background. Defaults to <tt class="docutils literal"><span class="pre">WHITE</span></tt></li>
+<li><strong>def_ball_rad</strong> &#8211; Default radius (in px) for <tt class="xref py py-class docutils literal"><span class="pre">objects.Ball</span></tt> objects added to the table. Defaults to <tt class="docutils literal"><span class="pre">20</span></tt></li>
+<li><strong>def_ball_cl</strong> &#8211; Default color of <tt class="xref py py-class docutils literal"><span class="pre">objects.Ball</span></tt> objects added to the table. Defaults to <tt class="docutils literal"><span class="pre">BLUE</span></tt></li>
+<li><strong>def_pad_len</strong> &#8211; Default length (in px) of <tt class="xref py py-class docutils literal"><span class="pre">objects.Paddle</span></tt> objects added to the table. Defaults to <tt class="docutils literal"><span class="pre">100</span></tt></li>
+<li><strong>def_wall_cl</strong> &#8211; Default color of <tt class="xref py py-class docutils literal"><span class="pre">objects.Wall</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">objects.AbnormWall</span></tt> objects added to the table. Defaults to <tt class="docutils literal"><span class="pre">BLACK</span></tt></li>
+<li><strong>def_occ_cl</strong> &#8211; Default color of <tt class="xref py py-class docutils literal"><span class="pre">objects.Occlusion</span></tt> objects added to the table. Defaults to <tt class="docutils literal"><span class="pre">GREY</span></tt></li>
+<li><strong>def_pad_cl</strong> &#8211; Default color of <tt class="xref py py-class docutils literal"><span class="pre">objects.Paddle</span></tt> objects added to the table. Defaults to <tt class="docutils literal"><span class="pre">BLACK</span></tt></li>
+<li><strong>active</strong> &#8211; Defines the initial activity of the table. See the <a class="reference internal" href="#BasicTable.activate" title="BasicTable.activate"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.activate()</span></tt></a> and <a class="reference internal" href="#BasicTable.deactivate" title="BasicTable.deactivate"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.deactivate()</span></tt></a> methods. Defaults to <tt class="docutils literal"><span class="pre">True</span></tt></li>
+<li><strong>soffset</strong> &#8211; A tuple (x,y) of the offset from the parent Surface to place this table for drawing. If <tt class="docutils literal"><span class="pre">None</span></tt> (default), places the table in the middle of the surface</li>
+<li><strong>defscreen</strong> &#8211; A <tt class="xref py py-class docutils literal"><span class="pre">pygame.Surface</span></tt> object on which to place the BasicTable. If <tt class="docutils literal"><span class="pre">None</span></tt> (default) and a pygame window is open, defaults to the display surface</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="adding-objects">
+<h3>2.1.1. Adding Objects<a class="headerlink" href="#adding-objects" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="BasicTable.addBall">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">addBall</tt><big>(</big><em>initpos</em>, <em>initvel</em>, <em>rad</em>, <em>color</em>, <em>elast</em><big>)</big><a class="headerlink" href="#BasicTable.addBall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a ball to the table, centered at an (x,y) coordinate defined in <tt class="docutils literal"><span class="pre">initpos</span></tt>, with a velocity vector (vx,vy) given to <tt class="docutils literal"><span class="pre">initvel</span></tt>.
+If not defined, radius and color are set to the table defaults, and elasticity is set to 1.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.addWall">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">addWall</tt><big>(</big><em>upperleft</em>, <em>lowerright</em>, <em>color</em>, <em>elast</em><big>)</big><a class="headerlink" href="#BasicTable.addWall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a rectangular wall to the table, with upperleft and lowerright coordinates given. If not defined, color is set to the table default, and elasticity is set to 1.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.addAbnormWall">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">addAbnormWall</tt><big>(</big><em>vertexlist</em>, <em>color</em>, <em>elast</em><big>)</big><a class="headerlink" href="#BasicTable.addAbnormWall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a non-rectangular wall to the table. Vertices are given as a list of (x,y) tuples in <tt class="docutils literal"><span class="pre">vertexlist</span></tt>, and must be convex and counterclockwise. If not defined, color is set to the table default, and elasticity is set to 1.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.addOcc">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">addOcc</tt><big>(</big><em>upperleft</em>, <em>lowerright</em>, <em>color</em><big>)</big><a class="headerlink" href="#BasicTable.addOcc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a rectangular occluder to the table, with upperleft and lowerright coordinates given. Balls can pass through occluders, but cannot be seen through them. If not defined, color is set to the table default.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.addGoal">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">addGoal</tt><big>(</big><em>upperleft</em>, <em>lowerright</em>, <em>onreturn</em>, <em>color</em><big>)</big><a class="headerlink" href="#BasicTable.addGoal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a rectangular goal to the table, with upperleft and lowerright coordinates given.
+When a ball hits a goal the table will no longer unfold in time, and <a class="reference internal" href="#BasicTable.step" title="BasicTable.step"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.step()</span></tt></a> calls will return the value defined in <tt class="docutils literal"><span class="pre">onreturn</span></tt>.
+If a color is not given, the goal will be invisible.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.addPaddle">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">addPaddle</tt><big>(</big><em>p1</em>, <em>p2</em>, <em>padlen</em>, <em>padwid</em>, <em>hitret</em>, <em>active</em>, <em>acol</em>, <em>iacol</em>, <em>pthcol</em>, <em>elast</em><big>)</big><a class="headerlink" href="#BasicTable.addPaddle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a paddle to the table, that can move between endpoints <tt class="docutils literal"><span class="pre">p1</span></tt> and <tt class="docutils literal"><span class="pre">p2</span></tt>. The paddle must be verticle or horizontal.
+If <tt class="docutils literal"><span class="pre">padlen</span></tt> is not defined, the length of the paddle itself is defined by table defaults. The <tt class="docutils literal"><span class="pre">padwid</span></tt> argument defines the thickness of the paddle.
+Paddles can act as goals if <tt class="docutils literal"><span class="pre">hitret</span></tt> is set - when a ball contacts the paddle, then <a class="reference internal" href="#BasicTable.step" title="BasicTable.step"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.step()</span></tt></a> calls will return <tt class="docutils literal"><span class="pre">hitret</span></tt>.
+If <tt class="docutils literal"><span class="pre">active</span></tt> is set to <tt class="docutils literal"><span class="pre">False</span></tt>, the paddle cannot be moved. Colors can be set for active paddles (<tt class="docutils literal"><span class="pre">acol</span></tt>), inactive paddles (<tt class="docutils literal"><span class="pre">iacol</span></tt>), and the background path the paddle can travel (<tt class="docutils literal"><span class="pre">pthcol</span></tt>).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="simulating">
+<h3>2.1.2. Simulating<a class="headerlink" href="#simulating" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="BasicTable.step">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">step</tt><big>(</big><em>t</em>, <em>maxtime</em><big>)</big><a class="headerlink" href="#BasicTable.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates the table forward by <tt class="docutils literal"><span class="pre">t</span></tt> seconds. <tt class="docutils literal"><span class="pre">t</span></tt> defaults to <tt class="docutils literal"><span class="pre">1/50.</span></tt> and should be evenly slicable into milliseconds to avoid step rounding.</p>
+<p>If nothing happens during this step, this returns <tt class="docutils literal"><span class="pre">None</span></tt>. If a ball hits a goal, the function will return the goal&#8217;s <tt class="docutils literal"><span class="pre">onreturn</span></tt> value.
+If <tt class="docutils literal"><span class="pre">maxtime</span></tt> is given and the table has been running for more than that value (in seconds), this returns the constant <tt class="docutils literal"><span class="pre">TIMEUP</span></tt>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="drawing">
+<h3>2.1.3. Drawing<a class="headerlink" href="#drawing" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="BasicTable.draw">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">draw</tt><big>(</big><em>stillshow</em><big>)</big><a class="headerlink" href="#BasicTable.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws the table onto the parent surface, and returns a <tt class="xref py py-class docutils literal"><span class="pre">pygame.Surface</span></tt> object with just the table drawing on it. If <tt class="docutils literal"><span class="pre">stillshow</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>, the balls will be shown through the <tt class="xref py py-class docutils literal"><span class="pre">objects.Occlusion</span></tt> objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.demonstrate">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">demonstrate</tt><big>(</big><em>screen</em>, <em>timesteps</em>, <em>retpath</em>, <em>onclick</em>, <em>maxtime</em><big>)</big><a class="headerlink" href="#BasicTable.demonstrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates the path of the table forward until a ball hits a goal or time expires, then returns the time it took until expiration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>screen</strong> &#8211; A <tt class="xref py py-class docutils literal"><span class="pre">pygame.Surface</span></tt> object to draw on</li>
+<li><strong>timesteps</strong> &#8211; The time (in seconds) between animation frames. Defaults to <tt class="docutils literal"><span class="pre">1/50.</span></tt></li>
+<li><strong>onclick</strong> &#8211; Can take in a function that takes a <a class="reference internal" href="#BasicTable" title="BasicTable"><tt class="xref py py-class docutils literal"><span class="pre">BasicTable</span></tt></a> as an argument, then calls that function on this table whenever the mouse is clicked (for debugging)</li>
+<li><strong>maxtime</strong> &#8211; The maximum time (in seconds) the demonstration will run without hitting a goal. If not given, will run (potentially) forever.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.makeMovie">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">makeMovie</tt><big>(</big><em>moviename</em>, <em>outputdir</em>, <em>fps</em>, <em>removeframes</em>, <em>maxtime</em><big>)</big><a class="headerlink" href="#BasicTable.makeMovie" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>NOTE: requires ffmpeg to function</em></p>
+<p>Like <tt class="xref py py-func docutils literal"><span class="pre">demonstrate()</span></tt>, but makes the demonstration into a movie file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>moviename</strong> &#8211; Name of the movie file</li>
+<li><strong>outputdir</strong> &#8211; The directory to place the movie in (defaults to current directory)</li>
+<li><strong>fps</strong> &#8211; The frames per second to run the movie at (defaults to 20)</li>
+<li><strong>removeframes</strong> &#8211; If set to <tt class="docutils literal"><span class="pre">False</span></tt>, keeps the individual frames around after the movie is created</li>
+<li><strong>maxtime</strong> &#8211; Like <a class="reference internal" href="#BasicTable.demonstrate" title="BasicTable.demonstrate"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.demonstrate()</span></tt></a>, the movie will run until a ball hits a goal, or until it has run for <tt class="docutils literal"><span class="pre">maxtime</span></tt> seconds</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="utilities">
+<h3>2.1.4. Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="BasicTable.activate">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">activate</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the table to be active, so the <a class="reference internal" href="#BasicTable.step" title="BasicTable.step"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.step()</span></tt></a> command steps the world forward</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.deactivate">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">deactivate</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the table to be inactive, so that the ball does not move when <a class="reference internal" href="#BasicTable.step" title="BasicTable.step"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.step()</span></tt></a> is called (however, paddle positions, etc. will update)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.mostlyOcc">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">mostlyOcc</tt><big>(</big><em>ball</em><big>)</big><a class="headerlink" href="#BasicTable.mostlyOcc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests whether a specific <tt class="xref py py-class docutils literal"><span class="pre">objects.Ball</span></tt> is at least half covered by an occluder; returns <tt class="docutils literal"><span class="pre">True</span></tt> if so, <tt class="docutils literal"><span class="pre">False</span></tt> otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.mostlyOccAll">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">mostlyOccAll</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.mostlyOccAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of boolean values asking whether each of the <a class="reference internal" href="#BasicTable.balls" title="BasicTable.balls"><tt class="xref py py-attr docutils literal"><span class="pre">BasicTable.balls</span></tt></a> is mostly covered.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.fullyOcc">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">fullyOcc</tt><big>(</big><em>ball</em><big>)</big><a class="headerlink" href="#BasicTable.fullyOcc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests whether a specific <tt class="xref py py-class docutils literal"><span class="pre">objects.Ball</span></tt> is completely covered by an occluder; returns <tt class="docutils literal"><span class="pre">True</span></tt> if so, <tt class="docutils literal"><span class="pre">False</span></tt> otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.fullyOccAll">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">fullyOccAll</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.fullyOccAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of boolean values asking whether each of the <a class="reference internal" href="#BasicTable.balls" title="BasicTable.balls"><tt class="xref py py-attr docutils literal"><span class="pre">BasicTable.balls</span></tt></a> is fully covered.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.activatePaddle">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">activatePaddle</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.activatePaddle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.deactivatePaddle">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">deactivatePaddle</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.deactivatePaddle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.togglePaddle">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">togglePaddle</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.togglePaddle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the paddle to active, inactive, or switches its activity</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.getRelativeMousePos">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">getRelativeMousePos</tt><big>(</big><big>)</big><a class="headerlink" href="#BasicTable.getRelativeMousePos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mouse position offset from the upper-left-hand corner of the table as an (x,y) tuple.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.assignSurface">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">assignSurface</tt><big>(</big><em>surface</em>, <em>offset</em><big>)</big><a class="headerlink" href="#BasicTable.assignSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reassigns the parent surface to <tt class="docutils literal"><span class="pre">surface</span></tt>, with a given offset</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BasicTable.set_timestep">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">set_timestep</tt><big>(</big><em>ts</em><big>)</big><a class="headerlink" href="#BasicTable.set_timestep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the minimum time between physical simulation steps to <tt class="docutils literal"><span class="pre">ts</span></tt>. This will by default be set to 1ms. Do not change this value lightly:
+higher values will cause the simulation to run faster, but run the risk of creating wonky, non-physical events if too coarse</p>
+</dd></dl>
+
+</div>
+<div class="section" id="object-access">
+<h3>2.1.5. Object Access<a class="headerlink" href="#object-access" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="BasicTable.balls">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">balls</tt><a class="headerlink" href="#BasicTable.balls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of <tt class="xref py py-class docutils literal"><span class="pre">object.Ball</span></tt> objects attached to the table</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BasicTable.walls">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">walls</tt><a class="headerlink" href="#BasicTable.walls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of <tt class="xref py py-class docutils literal"><span class="pre">object.Wall</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">object.AbnormWall</span></tt> objects attached to the table</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BasicTable.occludes">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">occludes</tt><a class="headerlink" href="#BasicTable.occludes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of <tt class="xref py py-class docutils literal"><span class="pre">object.Occlusion</span></tt> objects attached to the table</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BasicTable.goals">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">goals</tt><a class="headerlink" href="#BasicTable.goals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the <tt class="xref py py-class docutils literal"><span class="pre">object.Goal</span></tt> objects attached to the table</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BasicTable.goalrettypes">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">goalrettypes</tt><a class="headerlink" href="#BasicTable.goalrettypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the possible values that can be returned when a ball hits a goal on this table.
+Use the function <tt class="xref py py-func docutils literal"><span class="pre">physicsTable.Constants.getConst()</span></tt> to interpret these values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="BasicTable.paddle">
+<tt class="descclassname">BasicTable.</tt><tt class="descname">paddle</tt><a class="headerlink" href="#BasicTable.paddle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <tt class="xref py py-class docutils literal"><span class="pre">object.Paddle</span></tt> object on this table if it exists; otherwise, returns <tt class="docutils literal"><span class="pre">None</span></tt></p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="simpletable">
+<span id="id1"></span><h2>2.2. SimpleTable<a class="headerlink" href="#simpletable" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#SimpleTable" title="SimpleTable"><tt class="xref py py-class docutils literal"><span class="pre">SimpleTable</span></tt></a> objects are very similar to <a class="reference internal" href="#BasicTable" title="BasicTable"><tt class="xref py py-class docutils literal"><span class="pre">BasicTable</span></tt></a> objects with one exception: they cannot contain more than one ball.
+All functions are the same as <a class="reference internal" href="#BasicTable" title="BasicTable"><tt class="xref py py-class docutils literal"><span class="pre">BasicTable</span></tt></a> except where noted below</p>
+<dl class="class">
+<dt id="SimpleTable">
+<em class="property">class </em><tt class="descname">SimpleTable</tt><big>(</big><em>dims</em>, <em>closed_ends</em>, <em>background_cl</em>, <em>def_ball_rad</em>, <em>def_ball_cl</em>, <em>def_pad_len</em>, <em>def_wall_cl</em>, <em>def_occ_cl</em>, <em>def_pad_cl</em>, <em>active</em>, <em>soffset</em>, <em>defscreen</em><big>)</big><a class="headerlink" href="#SimpleTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identical to <a class="reference internal" href="#BasicTable" title="BasicTable"><tt class="xref py py-class docutils literal"><span class="pre">BasicTable</span></tt></a>, but returns a <a class="reference internal" href="#SimpleTable" title="SimpleTable"><tt class="xref py py-class docutils literal"><span class="pre">SimpleTable</span></tt></a> instead</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="SimpleTable.addBall">
+<tt class="descclassname">SimpleTable.</tt><tt class="descname">addBall</tt><big>(</big><em>initpos</em>, <em>initvel</em>, <em>rad</em>, <em>color</em>, <em>elast</em>, <em>dispwarn</em><big>)</big><a class="headerlink" href="#SimpleTable.addBall" title="Permalink to this definition">¶</a></dt>
+<dd><p>As <a class="reference internal" href="#BasicTable.addBall" title="BasicTable.addBall"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.addBall()</span></tt></a> except that if an <tt class="xref py py-class docutils literal"><span class="pre">objects.Ball</span></tt> already exists on the table,
+it will be overwritten. If <tt class="docutils literal"><span class="pre">dispwarn</span></tt> is set to <tt class="docutils literal"><span class="pre">True</span></tt>, you will be warned in the console if this happens.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="SimpleTable.mostlyOcc">
+<tt class="descclassname">SimpleTable.</tt><tt class="descname">mostlyOcc</tt><big>(</big><big>)</big><a class="headerlink" href="#SimpleTable.mostlyOcc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SimpleTable.mostlyOccAll">
+<tt class="descclassname">SimpleTable.</tt><tt class="descname">mostlyOccAll</tt><big>(</big><big>)</big><a class="headerlink" href="#SimpleTable.mostlyOccAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SimpleTable.fullyOcc">
+<tt class="descclassname">SimpleTable.</tt><tt class="descname">fullyOcc</tt><big>(</big><big>)</big><a class="headerlink" href="#SimpleTable.fullyOcc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SimpleTable.fullyOccAll">
+<tt class="descclassname">SimpleTable.</tt><tt class="descname">fullyOccAll</tt><big>(</big><big>)</big><a class="headerlink" href="#SimpleTable.fullyOccAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>As the same named methods from <a class="reference internal" href="#BasicTable" title="BasicTable"><tt class="xref py py-class docutils literal"><span class="pre">BasicTable</span></tt></a> except none take arguments and they all return a single boolean representing
+the occlusion state of the one ball on the <a class="reference internal" href="#SimpleTable" title="SimpleTable"><tt class="xref py py-class docutils literal"><span class="pre">SimpleTable</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="noisytable">
+<span id="noisy-table"></span><h2>2.3. NoisyTable<a class="headerlink" href="#noisytable" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#NoisyTable" title="NoisyTable"><tt class="xref py py-class docutils literal"><span class="pre">NoisyTable</span></tt></a> objects are <a class="reference internal" href="#SimpleTable" title="SimpleTable"><tt class="xref py py-class docutils literal"><span class="pre">SimpleTable</span></tt></a> objects that do not unfold deterministically. Instead each ball is placed
+with uncertainty in the position and velocity, and the physics unfolds noisily at each time step and whenever the ball bounces.
+Noise is defined by four parameters:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">perr</span></tt>: When a ball is placed, its location is slightly uncertain, and thus gets displaced from its real value. <tt class="docutils literal"><span class="pre">perr</span></tt> is the standard deviation of a 2-D Gaussian defining the noise in that position</li>
+<li><tt class="docutils literal"><span class="pre">kapv</span></tt>: When a ball is placed, its direction of motion is also uncertain. Its velocity thus is drawn from a vonMises distribution centered around the actual direction with concentration parameter <tt class="docutils literal"><span class="pre">kapv</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">kapm</span></tt>: At each point in time that the ball&#8217;s motion can be &#8216;jittered&#8217; by redrawing it from a vonMises distribution centered around the current direction with concentration parameter <tt class="docutils literal"><span class="pre">kapm</span></tt>. <em>NOTE: if the physics timesteps are changed with</em> <a class="reference internal" href="#BasicTable.set_timestep" title="BasicTable.set_timestep"><tt class="xref py py-func docutils literal"><span class="pre">BasicTable.set_timestep()</span></tt></a>, <em>the impact of this parameter will change</em></li>
+<li><tt class="docutils literal"><span class="pre">kapb</span></tt>: Whenever the ball hits a wall, it can bounce at an odd angle. Therefore its direction is redrawn from a vonMises distribution centered around the direction it should travel with concentration parameter <tt class="docutils literal"><span class="pre">kapv</span></tt></li>
+</ul>
+<p>See Smith &amp; Vul (2013) for further description of these noise parameters. All parameters default to the values used in that paper</p>
+<p>Typically, <a class="reference internal" href="#NoisyTable" title="NoisyTable"><tt class="xref py py-class docutils literal"><span class="pre">NoisyTable</span></tt></a> objects are created by &#8220;making&#8221; a <a class="reference internal" href="#SimpleTable" title="SimpleTable"><tt class="xref py py-class docutils literal"><span class="pre">SimpleTable</span></tt></a> noisy through the <a class="reference internal" href="#makeNoisy" title="makeNoisy"><tt class="xref py py-func docutils literal"><span class="pre">makeNoisy()</span></tt></a> function:</p>
+<dl class="function">
+<dt id="makeNoisy">
+<tt class="descname">makeNoisy</tt><big>(</big><em>table</em>, <em>kapv</em>, <em>kapb</em>, <em>kapm</em>, <em>perr</em><big>)</big><a class="headerlink" href="#makeNoisy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a <a class="reference internal" href="#SimpleTable" title="SimpleTable"><tt class="xref py py-class docutils literal"><span class="pre">SimpleTable</span></tt></a> and uncertainty parameters and returns a <a class="reference internal" href="#NoisyTable" title="NoisyTable"><tt class="xref py py-class docutils literal"><span class="pre">NoisyTable</span></tt></a>. If uncertainty
+parameters are not given, they default to the values of Smith &amp; Vul (2013)</p>
+</dd></dl>
+
+<p>If constructed de novo, <a class="reference internal" href="#NoisyTable" title="NoisyTable"><tt class="xref py py-class docutils literal"><span class="pre">NoisyTable</span></tt></a> objects are created like parent tables</p>
+<dl class="class">
+<dt id="NoisyTable">
+<em class="property">class </em><tt class="descname">NoisyTable</tt><big>(</big><em>dims</em>, <em>kapv</em>, <em>kapb</em>, <em>kapm</em>, <em>perr</em>, <em>closed_ends</em>, <em>background_cl</em>, <em>def_ball_rad</em>, <em>def_ball_cl</em>, <em>def_pad_len</em>, <em>def_wall_cl</em>, <em>def_occ_cl</em>, <em>def_pad_cl</em>, <em>active</em>, <em>soffset</em>, <em>defscreen</em><big>)</big><a class="headerlink" href="#NoisyTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>All parameters are the same as <a class="reference internal" href="#BasicTable" title="BasicTable"><tt class="xref py py-class docutils literal"><span class="pre">BasicTable</span></tt></a>, with additional parameters as described above.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="gravitytable">
+<span id="gravity-table"></span><h2>2.4. GravityTable<a class="headerlink" href="#gravitytable" title="Permalink to this headline">¶</a></h2>
+<p><em>TO ADD - Not much going on with this type of table yet</em></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2. Tables</a><ul>
+<li><a class="reference internal" href="#basictable">2.1. BasicTable</a><ul>
+<li><a class="reference internal" href="#adding-objects">2.1.1. Adding Objects</a></li>
+<li><a class="reference internal" href="#simulating">2.1.2. Simulating</a></li>
+<li><a class="reference internal" href="#drawing">2.1.3. Drawing</a></li>
+<li><a class="reference internal" href="#utilities">2.1.4. Utilities</a></li>
+<li><a class="reference internal" href="#object-access">2.1.5. Object Access</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#simpletable">2.2. SimpleTable</a></li>
+<li><a class="reference internal" href="#noisytable">2.3. NoisyTable</a></li>
+<li><a class="reference internal" href="#gravitytable">2.4. GravityTable</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">1. Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="objects.html"
+                        title="next chapter">3. Objects</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tables.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="objects.html" title="3. Objects"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="1. Introduction"
+             >previous</a> |</li>
+        <li><a href="index.html">PhysicsTables 0.12 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Kevin A Smith.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

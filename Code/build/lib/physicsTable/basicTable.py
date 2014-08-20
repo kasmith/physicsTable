@@ -9,7 +9,7 @@ from .constants import *
 from .objects import *
 import numpy as np
 from rectangles import *
-import subprocess, os, sys, shutil, shlex
+import subprocess, os, sys, shutil, shlex, warnings
 from weakref import ref
 
 # Methods:
@@ -354,7 +354,7 @@ class BasicTable(object):
         pg.display.update(self.surface.get_rect().move(self.soff[0],self.soff[1]))
         #pg.display.update()
         
-    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None):
+    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None, waitafter = True):
         frrate = int(1 / timesteps)
         if maxtime is not None: maxsteps = int(frrate * maxtime)
         else: maxsteps = 99999999999
@@ -402,7 +402,7 @@ class BasicTable(object):
         self.draw()
         pg.display.flip()
         
-        waiting = True
+        waiting = waitafter
         while waiting:
             for event in pg.event.get():
                 if event.type == QUIT: sys.exit(0)
@@ -413,11 +413,17 @@ class BasicTable(object):
         return self.tm
     
     def makeMovie(self, moviename, outputdir = '.', fps = 20, removeframes = True, maxtime = None):
+        
+        spl = moviename.split('.')
+        if len(spl) == 2 and spl[1] != 'mov':
+            warnings.warn('Incorrect extension - requires .mov')
+            return None
+        elif len(spl) == 2: moviename = spl[0]
+        
         try:
-            subprocess.call('ffmpeg')
-            print 'ffmpeg installed'
+            subprocess.call('ffmpeg',stdout = open(os.devnull,'w'),stderr=subprocess.STDOUT)
         except:
-            print 'ffmpeg not installed - required to make movie'
+            warnings.warn('ffmpeg not installed - required to make movie')
             return None
         
         pthnm = os.path.join(outputdir, 'tmp_' + moviename)
@@ -425,7 +431,7 @@ class BasicTable(object):
             os.mkdir(pthnm)
         
         if os.listdir(pthnm) != []:
-            print "Files exist in temporary directory", pthnm,'; delete and try again'
+            warnings.warn("Files exist in temporary directory", pthnm,'; delete and try again')
             return None
         
         timeperframe = 1. / fps
@@ -442,12 +448,14 @@ class BasicTable(object):
             if e is not None: running = False
         
         
-        ffcall = 'ffmpeg -r ' + str(fps) + ' -i ' + tnmbase + ' -pix_fmt yuv420p ' + os.path.join(outputdir, moviename + '.mov')
+        ffcall = 'ffmpeg -y -r ' + str(fps) + ' -i ' + tnmbase + ' -pix_fmt yuv420p ' + os.path.join(outputdir, moviename + '.mov')
         ffargs = shlex.split(ffcall)
         print ffargs
         subprocess.call(ffargs)
         
         if removeframes:
             shutil.rmtree(pthnm)
+        
+        return True
         
             

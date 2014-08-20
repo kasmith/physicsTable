@@ -1,7 +1,7 @@
 
 
 from __future__ import division
-import sys,os
+import sys,os,warnings
 from simpleTable import *
 import cPickle as pickle
 from math import sqrt
@@ -68,9 +68,10 @@ class SimpleTrial(object):
     
     def normalizeVel(self):
         v = self.ball[1]
-        vmag = sqrt(v[0]*v[0] + v[1]*v[1])
-        vadj = self.dbv / vmag
-        self.ball = (self.ball[0], (v[0]*vadj, v[1]*vadj), self.ball[2], self.ball[3], self.ball[4])
+        if v != (0,0):
+            vmag = sqrt(v[0]*v[0] + v[1]*v[1])
+            vadj = self.dbv / vmag
+            self.ball = (self.ball[0], (v[0]*vadj, v[1]*vadj), self.ball[2], self.ball[3], self.ball[4])
     
     def checkConsistency(self, maxsteps = 50000):
         good = True
@@ -83,50 +84,50 @@ class SimpleTrial(object):
             pbox = None
         
         if not self.ball:
-            print "Need to add a ball"
+            warnings.warn( "Need to add a ball" )
             good = False
         else:
             br = ctb.balls.getboundrect()
             for w in ctb.walls:
                 if w.shapetype == SHAPE_RECT:
                     if br.colliderect(w.r):
-                        print "Ball overlaps with wall"
+                        warnings.warn( "Ball overlaps with wall" )
                         good = False
                 else:
                     if br.colliderect(w.getBoundRect()):
                         if w.poly.point_query(ctb.balls.getpos()):
-                            print "Ball overlaps with abnormal wall"
+                            warnings.warn( "Ball overlaps with abnormal wall" )
                             good = False
                         else:
-                            print "POSSIBLE WARNING: Ball MAY overlap with abnormal wall"
+                            warnings.warn( "POSSIBLE WARNING: Ball MAY overlap with abnormal wall" )
                             good = -1
             if br.collidelist([g.r for g in ctb.goals]) != -1:
-                print "Ball overlaps with goal"
+                warnings.warn( "Ball overlaps with goal" )
                 good = False
             if pbox:
                 if br.colliderect(pbox):
-                    print "Ball overlaps with paddle path"
+                    warnings.warn( "Ball overlaps with paddle path" )
                     good = False
             
         for g in ctb.goals:
             for w in ctb.walls:
                 if w.shapetype == SHAPE_RECT:
                     if g.r.colliderect(w.r):
-                        print "Goal overlaps with wall"
+                        warnings.warn( "Goal overlaps with wall" )
                         good = False
                 else:
                     if g.r.colliderect(w.getBoundRect()):
                         if w.poly.segment_query(g.r.topleft,g.r.topright) or w.poly.segment_query(g.r.topleft,g.r.bottomleft) or w.poly.segment_query(g.r.topright,g.r.bottomright) or w.poly.segment_query(g.r.bottomleft,g.r.bottomright):
-                            print "Goal overlaps with abnormal wall"
+                            warnings.warn( "Goal overlaps with abnormal wall" )
                             good = False
             
             if pbox:
                 if g.r.colliderect(pbox):
-                    print "Goal and paddle path intersect"
+                    warnings.warn( "Goal and paddle path intersect" )
                     good = False
                     
             if g.r.collidelist([o.r for o in ctb.occludes]) != -1:
-                print "Goal is at least partially occluded"
+                warnings.warn( "Goal is at least partially occluded" )
                 good = False
         
         if len(ctb.goals) > 1:
@@ -134,25 +135,25 @@ class SimpleTrial(object):
                 g1 = ctb.goals[i-1]
                 g2 = ctb.goals[i]
                 if g1.r.colliderect(g2.r):
-                    print "Two goals overlap"
+                    warnings.warn( "Two goals overlap" )
                     good = False
         
         if pbox:
             for w in ctb.walls:
                 if w.shapetype == SHAPE_RECT:
                     if pbox.colliderect(w.r):
-                        print "Paddle path intersects wall"
+                        warnings.warn( "Paddle path intersects wall" )
                         good = False
                 else:
                     if pbox.colliderect(w.getBoundRect()):
                         ep = ctb.paddle.getendpts()
                         if w.poly.segment_query(ep[0],ep[1]):
-                            print "Paddle path intersects abnormal wall"
+                            warnings.warn( "Paddle path intersects abnormal wall" )
                             good = False
             
         if ctb.mostlyOccAll():
             good = False
-            print "Ball is mostly occluded at start"
+            warnings.warn( "Ball is mostly occluded at start")
         
         running = True
         stp = 0
@@ -167,7 +168,7 @@ class SimpleTrial(object):
         
         if ctb.mostlyOccAll():
             good = False
-            print "Ball is mostly occluded at end"
+            warnings.warn( "Ball is mostly occluded at end" )
         
         return good
     
@@ -189,7 +190,7 @@ class PongTrial(SimpleTrial):
     def checkConsistency(self,maxsteps = 50000):
         good = True
         if len(self.goals) != 0:
-            print "No goals allowed on a PongTable"
+            warnings.warn( "No goals allowed on a PongTable")
             good = False
         if not super(PongTrial, self).checkConsistency(maxsteps): good = False
         return good
@@ -200,11 +201,11 @@ class RedGreenTrial(SimpleTrial):
     def checkConsistency(self, maxsteps = 50000):
         good = True
         if len(self.goals) != 2:
-            print "Need two goals for a red/green trial"
+            warnings.warn("Need two goals for a red/green trial")
             good = False
             
-        if REDGOAL not in map(lambda x: x[2], self.goals): print "Need a REDGOAL return"; good = False
-        if GREENGOAL not in map(lambda x: x[2], self.goals): print "Need a GREENGOAL return"; good = False
+        if REDGOAL not in map(lambda x: x[2], self.goals): warnings.warn("Need a REDGOAL return"); good = False
+        if GREENGOAL not in map(lambda x: x[2], self.goals): warnings.warn("Need a GREENGOAL return"); good = False
         if not super(RedGreenTrial, self).checkConsistency(maxsteps): good = False
         return good
     
