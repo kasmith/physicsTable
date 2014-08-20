@@ -81,7 +81,25 @@ class RGButton(object):
             return self.name
         else: return None
         
-    def setIcon(self, newicon): self.icon = newicon
+    def setIcon(self, newicon):
+        
+        if newicon == 'save': self.icon = isave
+        elif newicon == 'saveas': self.icon = isaveas
+        elif newicon == 'load': self.icon = iload
+        elif newicon == 'play': self.icon = iplay
+        elif newicon == 'stop': self.icon = istop
+        elif newicon == 'record': self.icon = irec
+        elif newicon == 'undo': self.icon = iundo
+        elif newicon == 'redo': self.icon = iredo
+        elif newicon == 'cursor': self.icon = icurs
+        elif newicon == 'ball': self.icon = iball
+        elif newicon == 'ggoal': self.icon = iggoal
+        elif newicon == 'rgoal': self.icon = irgoal
+        elif newicon == 'wall': self.icon = iwall
+        elif newicon == 'occ': self.icon = iocc
+        else: print "Icon not found"; return False
+        return True
+    
     
     def draw(self):
         surf = pg.Surface(self.size)

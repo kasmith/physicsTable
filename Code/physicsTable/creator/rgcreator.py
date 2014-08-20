@@ -192,7 +192,7 @@ class RGCreator(object):
             return None
         
         tb = tr.makeTable()
-        self.menu.buttons['play'].setIcon(istop)
+        self.menu.buttons['play'].setIcon('stop')
         self.menu.disableButtonsButOne('play')
         
         sc = pg.display.get_surface()
@@ -211,7 +211,7 @@ class RGCreator(object):
                 elif e.type == MOUSEBUTTONDOWN:
                     act = self.menu.checkClick(pg.mouse.get_pos())
                     if act == 'play':
-                        self.menu.buttons['play'].setIcon(iplay)
+                        self.menu.buttons['play'].setIcon('play')
                         self.menu.enableButtons()
                         if len(self.undostack) == 0: self.menu.buttons['undo'].disable()
                         if len(self.redostack) == 0: self.menu.buttons['redo'].disable()
@@ -741,11 +741,11 @@ class RGCreator(object):
         
         return True
         
-    def makeTrial(self):
+    def makeTrial(self, bvel = 300):
         if self.ball is None or self.rgoal is None or self.ggoal is None:
             tkMessageBox.showerror('Missing object','Cannot do this until you have a ball, red goal, and green goal')
             return None
-        tr = RedGreenTrial(self.name, self.tbdim, def_ball_vel=300)
+        tr = RedGreenTrial(self.name, self.tbdim, def_ball_vel=bvel)
         tr.addBall(self.ball[0],self.ball[1],self.ball[2])
         tr.addGoal(self.rgoal[0],self.rgoal[1],REDGOAL,RED)
         tr.addGoal(self.ggoal[0],self.ggoal[1],GREENGOAL,GREEN)
