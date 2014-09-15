@@ -40,6 +40,11 @@ class SimpleTable(BasicTable):
         self.on_addball(newball)
         self.balls = newball
         return newball
+
+    def removeBall(self):
+        if self.balls is None: return True
+        self.sp.remove(self.balls.body, self.balls.circle)
+        self.balls = None
     
     def draw(self, stillshow = False):
         self.surface.fill(self.bk_c)
@@ -57,7 +62,7 @@ class SimpleTable(BasicTable):
         return self.surface
     
     def addBounce(self, shapeobj):
-        if self.balls.circle == shapeobj: self.balls.bounces += 1
+        if self.balls and self.balls.circle == shapeobj: self.balls.bounces += 1
         
     def coll_ball_wall(self, arbiter):
         map(self.addBounce,arbiter.shapes)
@@ -71,6 +76,11 @@ class SimpleTable(BasicTable):
         if len(arbiter.shapes) > 2: print "Shouldn't have multi-collision... may be errors"
         self.padhit = True
         self.on_paddlehit(self.balls, self.paddle)
+
+    def coll_ball_ball(self, arbiter):
+        print arbiter.shapes
+        raise Exception('Found two balls colliding when at most one exists')
+        #self.on_ballhit([b for b in self.balls if b.circle in arbiter.shapes])
         
     def mostlyOcc(self): return super(SimpleTable,self).mostlyOcc(self.balls)
     def mostlyOccAll(self): return self.mostlyOcc()

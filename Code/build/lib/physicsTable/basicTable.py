@@ -261,7 +261,7 @@ class BasicTable(object):
             self.goalrettypes.append(onreturn)
         return newgoal
         
-    def addPaddle(self,p1, p2, padlen = None, padwid = 3, hitret = None, active = True, acol = BLACK, iacol = GREY, pthcol = None, elast = 1., suppressoverwrite = False, pmsp = None):
+    def addPaddle(self,p1, p2, padlen = None, padwid = 3, hitret = None, active = True, acol = BLACK, iacol = GREY, pthcol = LIGHTGREY, elast = 1., suppressoverwrite = False, pmsp = None):
         if pmsp is None: pmsp = self.sp
         if active: sta = self.sp
         else: sta = None
@@ -431,7 +431,7 @@ class BasicTable(object):
             os.mkdir(pthnm)
         
         if os.listdir(pthnm) != []:
-            warnings.warn("Files exist in temporary directory", pthnm,'; delete and try again')
+            warnings.warn("Files exist in temporary directory " + pthnm + '; delete and try again')
             return None
         
         timeperframe = 1. / fps

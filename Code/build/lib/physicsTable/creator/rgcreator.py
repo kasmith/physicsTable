@@ -239,11 +239,11 @@ class RGCreator(object):
         if kp[MODKEYS[0]] or kp[MODKEYS[1]]:
             if kp[K_q]: self.quit() # Quit
             if kp[K_z]: # Undo
-                self.implementAction(self.undostack.pop(),isundo=True)
+                if len(self.undostack) > 0: self.implementAction(self.undostack.pop(),isundo=True)
                 if len(self.undostack) == 0: self.menu.buttons['undo'].disable()
                 return True
             if kp[K_y]: # Redo
-                self.implementAction(self.redostack.pop(),isredo = True)
+                if len (self.redostack) > 0: self.implementAction(self.redostack.pop(),isredo = True)
                 if len(self.redostack) == 0: self.menu.buttons['redo'].disable()
                 return True
             if kp[K_s]: self.save(); return True
@@ -383,9 +383,9 @@ class RGCreator(object):
     # Runs the movement or resizing of the selected object
     def docursor(self, mpos):
         
-        # Make sure the button is held down for more than 100ms before any moving or resizing
+        # Make sure the button is held down for more than 200ms before any moving or resizing
         stime = time.time()
-        while (time.time() - stime) < .1:
+        while (time.time() - stime) < .2:
             if not any(pg.mouse.get_pressed()): return False
         
         orect = self.getObjRect(self.selectedobj)

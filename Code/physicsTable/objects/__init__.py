@@ -200,8 +200,14 @@ class Paddle(object):
         self.act = True
         space.add(self.seg)
         self.update(mp)
-        
-    
+
+    def changeLen(self,newsize, mp = None):
+        self.hlen = int(newsize / 2)
+        if mp is None:
+            if self.dir == HORIZONTAL: mp = (self.pos,self.otherpos)
+            else: mp = (self.otherpos,self.pos)
+        self.update(mp)
+
     def deactivate(self, space = None):
         if space is None: space = self.sp
         self.act = False

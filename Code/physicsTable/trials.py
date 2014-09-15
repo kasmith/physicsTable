@@ -55,7 +55,18 @@ class SimpleTrial(object):
     def makeTable(self,soffset = None, paddleasgoal = False):
         tb = SimpleTable(self.dims,self.ce,self.bkc,self.dbr,self.dbc,self.dpl,self.dwc,self.doc,self.dpc, True, soffset)
         if self.ball: tb.addBall(self.ball[0], self.ball[1], self.ball[2], self.ball[3], self.ball[4])
-        if self.paddle: tb.addPaddle(self.paddle[0],self.paddle[1], self.paddle[2], self.paddle[3], self.paddle[4], self.paddle[5], self.paddle[6], self.paddle[7], self.paddle[8], False)
+        if self.paddle:
+            if paddleasgoal:
+                p1 = self.paddle[0]
+                p2 = self.paddle[1]
+                if p1[0] == p2[0]:
+                    if paddleasgoal == 'bottom': tb.addGoal(p1, (p2[0],self.dims[1]),self.paddle[4],LIGHTGREY)
+                    else: tb.addGoal((p1[0],0),p2,self.paddle[4],LIGHTGREY)
+                elif p1[1] == p2[1]:
+                    if paddleasgoal == 'right': tb.addGoal(p1,(self.dims[0],p2[1]),self.paddle[4],LIGHTGREY)
+                    else: tb.addGoal((0,p1[1]),p2,self.paddle[4],LIGHTGREY)
+                else: raise Exception('Paddle must be vertical or horizontal')
+            else: tb.addPaddle(self.paddle[0],self.paddle[1], self.paddle[2], self.paddle[3], self.paddle[4],True, self.paddle[5], self.paddle[6], self.paddle[7], self.paddle[8], False)
         for w in self.normwalls:
             tb.addWall(w[0],w[1],w[2],w[3])
         for w in self.abnormwalls:
@@ -76,7 +87,7 @@ class SimpleTrial(object):
     def checkConsistency(self, maxsteps = 50000):
         good = True
         
-        ctb = self.makeTable(paddleasgoal = True)
+        ctb = self.makeTable()
         
         if self.paddle:
             pbox = ctb.paddle.getbound()
