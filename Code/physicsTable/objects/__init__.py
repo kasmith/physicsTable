@@ -165,13 +165,12 @@ class Paddle(object):
     def update(self,mp):
         if self.dir == HORIZONTAL: np = mp[0]
         else: np = mp[1]
-        if np > self.lwrbound and np < self.uprbound:
-            self.pos = np
-            if self.act:
-                pts = self.getendpts()
-                self.seg.unsafe_set_a(pts[0])
-                self.seg.unsafe_set_b(pts[1])
-                self.seg.cache_bb()
+        self.pos = min(max(np,self.lwrbound),self.uprbound)
+        if self.act:
+            pts = self.getendpts()
+            self.seg.unsafe_set_a(pts[0])
+            self.seg.unsafe_set_b(pts[1])
+            self.seg.cache_bb()
         
     def getendpts(self):
         if self.dir == HORIZONTAL:
@@ -202,7 +201,10 @@ class Paddle(object):
         self.update(mp)
 
     def changeLen(self,newsize, mp = None):
+        oldhlen = self.hlen
         self.hlen = int(newsize / 2)
+        self.lwrbound = self.lwrbound - oldhlen + self.hlen
+        self.uprbound = self.uprbound + oldhlen - self.hlen
         if mp is None:
             if self.dir == HORIZONTAL: mp = (self.pos,self.otherpos)
             else: mp = (self.otherpos,self.pos)
