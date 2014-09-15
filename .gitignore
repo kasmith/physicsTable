@@ -1,0 +1,6 @@
+*.pyc
+*.pyo
+*.pyd
+Code/build/
+**/.DS_Store
+**/.idea
