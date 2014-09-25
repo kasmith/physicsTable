@@ -90,9 +90,9 @@ class SimpleSPSA ( object ):
                 delta = (np.random.randint(0, 2, num_p) * 2 - 1)
                 # Stochastic perturbation, innit
                 theta_plus = theta + ck*delta
-                theta_plus = np.minimum ( theta_plus, self.max_vals )
+                if self.max_vals: theta_plus = np.minimum ( theta_plus, self.max_vals )
                 theta_minus = theta - ck*delta
-                theta_minus = np.maximum ( theta_minus, self.min_vals )
+                if self.min_vals: theta_minus = np.maximum ( theta_minus, self.min_vals )
                 # Funcion values associated with ``theta_plus`` and 
                 #``theta_minus``
                 
