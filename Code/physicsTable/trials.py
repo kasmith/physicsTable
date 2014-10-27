@@ -5,6 +5,17 @@ import sys,os,warnings
 from simpleTable import *
 import cPickle as pickle
 from math import sqrt
+import json
+from pygame import Color
+
+
+def safeListify(tolist):
+
+    if hasattr(tolist, '__iter__') or isinstance(tolist, Color):
+        return [safeListify(l) for l in tolist]
+    else:
+        return tolist
+
 
 class SimpleTrial(object):
     
@@ -84,7 +95,7 @@ class SimpleTrial(object):
             vadj = self.dbv / vmag
             self.ball = (self.ball[0], (v[0]*vadj, v[1]*vadj), self.ball[2], self.ball[3], self.ball[4])
     
-    def checkConsistency(self, maxsteps = 50000):
+    def checkConsistency(self, maxsteps = 50000, nochecktime = False):
         good = True
         
         ctb = self.makeTable()
@@ -165,21 +176,22 @@ class SimpleTrial(object):
         if ctb.mostlyOccAll():
             good = False
             warnings.warn( "Ball is mostly occluded at start")
-        
-        running = True
-        stp = 0
-        while running:
-            stp += 1
-            if stp > maxsteps:
-                print "Takes too long to end"
+
+        if not nochecktime:
+            running = True
+            stp = 0
+            while running:
+                stp += 1
+                if stp > maxsteps:
+                    print "Takes too long to end"
+                    good = False
+                    running = False
+                e = ctb.step(TIMESTEP)
+                if e: running = False
+
+            if ctb.mostlyOccAll():
                 good = False
-                running = False
-            e = ctb.step(TIMESTEP)
-            if e: running = False
-        
-        if ctb.mostlyOccAll():
-            good = False
-            warnings.warn( "Ball is mostly occluded at end" )
+                warnings.warn( "Ball is mostly occluded at end" )
         
         return good
     
@@ -195,21 +207,49 @@ class SimpleTrial(object):
                 if ans == 'y': asking = False
             
         pickle.dump(self, open(flnm,'wb'))
-        
+
+    def jsonify(self, flnm = None, fldir = None, askoverwrite = True, pretty = False):
+        if flnm is None: flnm = self.name + '.json'
+        if fldir is not None: flnm = os.path.join(fldir, flnm)
+        if os.path.exists(flnm) and askoverwrite:
+            asking = True
+            while asking:
+                ans = raw_input('File exists; overwrite? (y/n): ')
+                if ans == 'n': return None
+                if ans == 'y': asking = False
+
+
+        jdict = {'Name': self.name,
+                 'Dims': self.dims,
+                 'ClosedEnds': self.ce,
+                 'BKColor': safeListify(self.bkc),
+                 'Ball': safeListify(self.ball),
+                 'Walls': safeListify(self.normwalls),
+                 'AbnormWalls': safeListify(self.abnormwalls),
+                 'Occluders': safeListify(self.occs),
+                 'Paddle': safeListify(self.paddle),
+                 'Goals': safeListify(self.goals)}
+
+        if pretty: jfl = json.dumps(jdict, separators=(',',': '), sort_keys=True, indent = 2)
+        else: jfl = json.dumps(jdict)
+        ofl = open(flnm,'w')
+        ofl.write(jfl)
+        ofl.close()
+
 class PongTrial(SimpleTrial):
     
-    def checkConsistency(self,maxsteps = 50000):
+    def checkConsistency(self,maxsteps = 50000,nochecktime = False):
         good = True
         if len(self.goals) != 0:
             warnings.warn( "No goals allowed on a PongTable")
             good = False
-        if not super(PongTrial, self).checkConsistency(maxsteps): good = False
+        if not super(PongTrial, self).checkConsistency(maxsteps,nochecktime): good = False
         return good
     
 
 class RedGreenTrial(SimpleTrial):
     
-    def checkConsistency(self, maxsteps = 50000):
+    def checkConsistency(self, maxsteps = 50000, nochecktime = False):
         good = True
         if len(self.goals) != 2:
             warnings.warn("Need two goals for a red/green trial")
@@ -217,7 +257,7 @@ class RedGreenTrial(SimpleTrial):
             
         if REDGOAL not in map(lambda x: x[2], self.goals): warnings.warn("Need a REDGOAL return"); good = False
         if GREENGOAL not in map(lambda x: x[2], self.goals): warnings.warn("Need a GREENGOAL return"); good = False
-        if not super(RedGreenTrial, self).checkConsistency(maxsteps): good = False
+        if not super(RedGreenTrial, self).checkConsistency(maxsteps,nochecktime): good = False
         return good
     
     def switchRedGreen(self):

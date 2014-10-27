@@ -186,7 +186,7 @@ class RGCreator(object):
                 
     # Runs the table forward in its given state
     def play(self):
-        tr = self.makeTrial()
+        tr = self.makeTrial(allowInfTime=True)
         if tr is None:
             #tkMessageBox.showerror('Trial error!', 'Trial is not a valid red/green trial. Needs the ball, each goal, and no overlaps between ball, goals, and wall')
             return None
@@ -741,7 +741,7 @@ class RGCreator(object):
         
         return True
         
-    def makeTrial(self, bvel = 300):
+    def makeTrial(self, bvel = 300, allowInfTime = False):
         if self.ball is None or self.rgoal is None or self.ggoal is None:
             tkMessageBox.showerror('Missing object','Cannot do this until you have a ball, red goal, and green goal')
             return None
@@ -757,7 +757,7 @@ class RGCreator(object):
         
         with warnings.catch_warnings(record = True) as w:
             warnings.simplefilter('always')
-            consist = tr.checkConsistency()
+            consist = tr.checkConsistency(nochecktime =allowInfTime)
             if len(w) > 1:
                 msg = "Multiple trial errors:"
                 for wm in w:

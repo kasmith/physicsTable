@@ -149,6 +149,7 @@ class Paddle(object):
         self.ret = hitreturn
         self.wid = width
         self.hlen = int(length / 2)
+        self.frozen = False
         self.pos = int((self.uprbound + self.lwrbound)/2)
         ps = self.getendpts()
         self.seg = pm.Segment(stb, ps[0],ps[1],self.wid)
@@ -160,9 +161,11 @@ class Paddle(object):
             self.activate(spacetoadd,mp)
         else: self.act = False
         self.sp = ref(pmsp)
+
         
     
     def update(self,mp):
+        if self.frozen: return None
         if self.dir == HORIZONTAL: np = mp[0]
         else: np = mp[1]
         self.pos = min(max(np,self.lwrbound),self.uprbound)
@@ -200,7 +203,11 @@ class Paddle(object):
         space.add(self.seg)
         self.update(mp)
 
+    def freeze(self): self.frozen = True
+    def unfreeze(self): self.frozen = False
+
     def changeLen(self,newsize, mp = None):
+        if self.frozen: return None
         oldhlen = self.hlen
         self.hlen = int(newsize / 2)
         self.lwrbound = self.lwrbound - oldhlen + self.hlen
