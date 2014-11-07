@@ -81,8 +81,8 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
             ul = (e1[0], e1[1] - table.paddle.width)
             lr = (e2[0], e2[1] + table.paddle.width)
         else:
-            ul = (e1[0] - table.paddle.width, e1[1])
-            lr = (e2[0] + table.paddle.width, e2[1])
+            ul = (e1[0] - table.paddle.wid, e1[1])
+            lr = (e2[0] + table.paddle.wid, e2[1])
         ntab.addGoal(ul, lr, paddlereturn, LIGHTGREY)
     return ntab
     
