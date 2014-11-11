@@ -63,7 +63,7 @@ class NoisyTable(SimpleTable):
         if self.balls is not None: self.jitter_ball(self.balls, self.kapm)
 
         
-def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS):
+def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS, straddlepaddle = True):
     
     ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
     ntab.set_timestep(table.basicts)
@@ -76,13 +76,22 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
     for g in table.goals: ntab.addGoal(g.r.topleft, g.r.bottomright, g.ret, g.col)
     # Turn paddle into a special goal that returns paddlereturn (SUCCESS by default)
     if table.paddle and paddlereturn:
-        e1, e2 = table.paddle.getendpts()
-        if table.paddle.dir == HORIZONTAL:
-            ul = (e1[0], e1[1] - table.paddle.width)
-            lr = (e2[0], e2[1] + table.paddle.width)
+        if straddlepaddle:
+            op = table.paddle.otherpos
+            if table.paddle.dir == HORIZONTAL:
+                ul = (0,op-table.paddle.wid)
+                lr = (table.dim[0],op+table.paddle.wid)
+            else:
+                ul = (op-table.paddle.wid,0)
+                lr = (op+table.paddle.wid,table.dim[1])
         else:
-            ul = (e1[0] - table.paddle.wid, e1[1])
-            lr = (e2[0] + table.paddle.wid, e2[1])
+            e1, e2 = table.paddle.getendpts()
+            if table.paddle.dir == HORIZONTAL:
+                ul = (e1[0], e1[1] - table.paddle.wid)
+                lr = (e2[0], e2[1] + table.paddle.wid)
+            else:
+                ul = (e1[0] - table.paddle.wid, e1[1])
+                lr = (e2[0] + table.paddle.wid, e2[1])
         ntab.addGoal(ul, lr, paddlereturn, LIGHTGREY)
     return ntab
     
