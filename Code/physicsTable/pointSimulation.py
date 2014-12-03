@@ -22,6 +22,7 @@ class PointSimulation(object):
         
         self.outcomes = None
         self.endpts = None
+        self.bounces = None
         self.run = False
         self.enend = ensure_end
         
@@ -34,6 +35,7 @@ class PointSimulation(object):
         n.set_timestep(self.ts)
         r = n.simulate(self.maxtime)
         p = n.balls.getpos()
+        nb = n.balls.bounces
         rp = (p[0],p[1])
         if self.enend:
             if r == TIMEUP:
@@ -42,7 +44,7 @@ class PointSimulation(object):
             if rp[0] < 0 or rp[0] > self.tab.dim[0] or rp[1] < 0 or rp[1] > self.tab.dim[1]:
                 self.badsims += 1
                 return(self.singleSim(i))
-        return [r, rp]
+        return [r, rp, nb]
     
     def runSimulation(self):
         
@@ -50,9 +52,10 @@ class PointSimulation(object):
         
         self.outcomes = [r[0] for r in ret]
         self.endpts = [r[1] for r in ret]
+        self.bounces = [r[2] for r in ret]
         self.run = True
         
-        return [self.outcomes, self.endpts]
+        return [self.outcomes, self.endpts, self.bounces]
         
     def getOutcomes(self):
         if not self.run: raise Exception('Cannot get simulation outcome without running simulations first')
@@ -69,6 +72,10 @@ class PointSimulation(object):
         if yonly and not xonly:
             return [p[1] for p in self.endpts]
         return self.endpts
+
+    def getBounces(self):
+        if not self.run: raise Exception('Cannot get simulation outcome without running simulations first')
+        return self.bounces
     
     def drawdensity(self, rp_wid = 5, greyscale = (0,255), gamadj = .2):
         ptharray = np.zeros(table.dim)
@@ -79,7 +86,6 @@ class PointSimulation(object):
             r = n.simulate(self.maxtime, return_path = True, rp_wid = rp_wid)
             print 'd',i
             return r[1]
-        #sims = multimap(singpth, range(self.nsims))
         sims = map(singpth, range(self.nsims))
         
         print 'simulated'
