@@ -44,7 +44,7 @@ class PointSimulation(object):
             if rp[0] < 0 or rp[0] > self.tab.dim[0] or rp[1] < 0 or rp[1] > self.tab.dim[1]:
                 self.badsims += 1
                 return(self.singleSim(i))
-        return [r, rp, nb]
+        return [r, rp, nb, n.tm]
     
     def runSimulation(self):
         
@@ -53,9 +53,10 @@ class PointSimulation(object):
         self.outcomes = [r[0] for r in ret]
         self.endpts = [r[1] for r in ret]
         self.bounces = [r[2] for r in ret]
+        self.tsims = [r[3] for r in ret]
         self.run = True
         
-        return [self.outcomes, self.endpts, self.bounces]
+        return [self.outcomes, self.endpts, self.bounces, self.tsims]
         
     def getOutcomes(self):
         if not self.run: raise Exception('Cannot get simulation outcome without running simulations first')
@@ -76,7 +77,27 @@ class PointSimulation(object):
     def getBounces(self):
         if not self.run: raise Exception('Cannot get simulation outcome without running simulations first')
         return self.bounces
-    
+
+    def getTimes(self):
+        if not self.run: raise Exception('Cannot get simulation outcome without running simulations first')
+        return self.tsims
+
+    def replaceOutcomes(self, badoutcomes = [TIMEUP, OUTOFBOUNDS],printout = False):
+        # Find the indices of all places where the outcomes are bad
+        idxs = [x[0] for x in enumerate(self.outcomes) if badoutcomes.count(x[1]) > 0]
+        if len(idxs) == 0: return None
+
+        if printout: print "Resimulating",len(idxs),"times"
+
+        ret = multimap(self.singleSim,range(len(idxs)), self.ucpus)
+        for i in range(len(idxs)):
+            idx = idxs[i]
+            self.outcomes[idx] = ret[i][0]
+            self.endpts[idx] = ret[i][1]
+            self.bounces[idx] = ret[i][2]
+            self.tsims[idx] = ret[i][3]
+        self.replaceOutcomes(badoutcomes,printout)
+
     def drawdensity(self, rp_wid = 5, greyscale = (0,255), gamadj = .2):
         ptharray = np.zeros(table.dim)
         
