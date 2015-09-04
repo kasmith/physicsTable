@@ -43,9 +43,19 @@ class NoisyTable(SimpleTable):
             while setting:
                 px = random.normalvariate(initpos[0],posjitter)
                 py = random.normalvariate(initpos[1],posjitter)
-                if px > rad and py > rad and px < (xdim - rad) and py < (ydim - rad):
-                    ball.setpos( (px, py) )
-                    setting = False
+                ball.setpos( (px, py) )
+                setting = False
+                # Check that the ball isn't outside the screen
+                if not (px > rad and py > rad and px < (xdim - rad) and py < (ydim - rad)):
+                    setting = True
+
+                # Check that the ball isn't stuck in walls or on a goal
+                brect = ball.getboundrect()
+                for w in self.walls:
+                    if brect.colliderect(w.r): setting = True
+                for g in self.goals:
+                    if brect.colliderect(g.r): setting = True
+
         
         if kappa:
             v = ball.getvel()

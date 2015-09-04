@@ -190,8 +190,8 @@ class BasicTable(object):
     def assignSurface(self, surface, offset = None):
         if offset is None:
             bigdim = surface.get_size()
-            xoff = int((bigdim[0] - dims[0]) / 2.)
-            yoff = int((bigdim[1] - dims[1]) / 2.)
+            xoff = int((bigdim[0] - self.dim[0]) / 2.)
+            yoff = int((bigdim[1] - self.dim[1]) / 2.)
             offset = (xoff,yoff)
         thisrect = pg.Rect(offset, self.dim)
         self.surface = surface.subsurface(thisrect)
