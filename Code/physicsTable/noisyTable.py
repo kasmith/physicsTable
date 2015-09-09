@@ -77,7 +77,6 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
     
     ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
     ntab.set_timestep(table.basicts)
-    if table.balls: ntab.addBall(table.balls.getpos(), table.balls.getvel())
     for w in table.walls: 
         if isinstance(w, AbnormWall): ntab.addAbnormWall(w.poly.get_vertices(), w.col, w.poly.elasticity)
         elif isinstance(w, Wall): ntab.addWall(w.r.topleft, w.r.bottomright,w.col, w.poly.elasticity)
@@ -103,6 +102,9 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
                 ul = (e1[0] - table.paddle.wid, e1[1])
                 lr = (e2[0] + table.paddle.wid, e2[1])
         ntab.addGoal(ul, lr, paddlereturn, LIGHTGREY)
+
+    if table.balls: ntab.addBall(table.balls.getpos(), table.balls.getvel())
+
     return ntab
     
     
