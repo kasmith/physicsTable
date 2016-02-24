@@ -6,7 +6,7 @@
 # ---------------------------------------------------
 
 __all__ = ['objects','SimpleTable','BasicTable','GravityTable','NoisyTable',
-           'Path','PathFilter','PointSimulation','SimpleTrial','PongTrial',
+           'Path','PathFilter','PointSimulation','SimpleTrial','PongTrial','PathMaker','loadPathMaker',
            'RedGreenTrial','loadTrial','constants','makeNoisy','startRGCreator','creator']
 
 from basicTable import BasicTable
@@ -15,6 +15,7 @@ from gravityTable import GravityTable
 from noisyTable import NoisyTable, makeNoisy        
 from pathFilter import Path, PathFilter
 from pointSimulation import PointSimulation
+from pathMaker import PathMaker, loadPathMaker
 from trials import SimpleTrial, PongTrial, RedGreenTrial, loadTrial
 
 import objects
