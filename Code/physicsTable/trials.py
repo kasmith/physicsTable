@@ -18,7 +18,9 @@ def safeListify(tolist):
 
 class SimpleTrial(object):
     
-    def __init__(self, name, dims, closed_ends = [LEFT, RIGHT, BOTTOM, TOP], background_cl = WHITE, def_ball_vel = 600, def_ball_rad = 20, def_ball_cl = BLUE,def_pad_len = 100, def_wall_cl = BLACK, def_occ_cl = GREY, def_pad_cl = BLACK):
+    def __init__(self, name, dims, closed_ends = [LEFT, RIGHT, BOTTOM, TOP], background_cl = WHITE, def_ball_vel = 600, \
+                 def_ball_rad = 20, def_ball_cl = BLUE,def_pad_len = 100, def_wall_cl = BLACK, def_occ_cl = GREY, \
+                 def_pad_cl = BLACK):
         self.name = name
         self.dims = dims
         self.ce = closed_ends
@@ -63,7 +65,11 @@ class SimpleTrial(object):
         self.occs.append( (upperleft, lowerright, color) )
         
     def makeTable(self,soffset = None, paddleasgoal = False):
-        tb = SimpleTable(self.dims,self.ce,self.bkc,self.dbr,self.dbc,self.dpl,self.dwc,self.doc,self.dpc, True, soffset)
+        try:
+            import pygame
+            tb = SimpleTable(self.dims,self.ce,self.bkc,self.dbr,self.dbc,self.dpl,self.dwc,self.doc,self.dpc, True, soffset)
+        except:
+            tb = SimpleTable(self.dims,self.ce,self.dbr,self.dpl,True)
         if self.ball: tb.addBall(self.ball[0], self.ball[1], self.ball[2], self.ball[3], self.ball[4])
         if self.paddle:
             if paddleasgoal:

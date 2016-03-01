@@ -7,12 +7,11 @@ __all__ = ['displayInstructions','mousePos','FONT_L','FONT_M','FONT_S','FONT_VL'
 
 try:
     import pygame as pg
+    from pyText import displayInstructions, mousePos, FONT_L, FONT_M, FONT_S, FONT_VL, screenPause
+    from vizobjects import Ball, Wall, Occlusion, AbnormWall, Goal, Paddle, ptRect
+    from viztables import BasicTable, SimpleTable
 except:
     raise Exception("pygame is required to import any visualizations")
-
-from pyText import displayInstructions, mousePos, FONT_L, FONT_M, FONT_S, FONT_VL, screenPause
-from vizobjects import Ball, Wall, Occlusion, AbnormWall, Goal, Paddle, ptRect
-from viztables import BasicTable, SimpleTable
 
 try:
     from matpltPygame import pgFig
