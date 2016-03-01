@@ -96,7 +96,13 @@ class BasicTable(object):
         self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_BALL, None, None, None, coll_func_ball_ball, tableref = ref(self))
         self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_WALL, None, None,None, coll_func_ball_wall, tableref = ref(self))
         self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_PAD,None, None,None, coll_func_ball_pad, tableref = ref(self))
-        
+
+        # Empty color info that gets replaced if pygame is there
+        self.bk_c = None
+        self.dballc = None
+        self.dwallc = None
+        self.doccc = None
+        self.dpadc = None
 
         self.balls = []
         self.walls = []
