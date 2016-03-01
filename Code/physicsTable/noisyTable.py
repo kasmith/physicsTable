@@ -73,8 +73,12 @@ class NoisyTable(SimpleTable):
 
         
 def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS, straddlepaddle = True):
-    
-    ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+
+    try:
+        import pygame
+        ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+    except:
+        ntab = NoisyTable(table.dim,kapv,kapb,kapm,perr,table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
     ntab.set_timestep(table.basicts)
     for w in table.walls: 
         if isinstance(w, AbnormWall): ntab.addAbnormWall(w.poly.get_vertices(), w.col, w.poly.elasticity)
