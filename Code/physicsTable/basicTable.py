@@ -103,6 +103,9 @@ class BasicTable(object):
         self.dwallc = None
         self.doccc = None
         self.dpadc = None
+        self.stored_soffset = None
+        self.soff = None
+        self.surface = None
 
         self.balls = []
         self.walls = []
