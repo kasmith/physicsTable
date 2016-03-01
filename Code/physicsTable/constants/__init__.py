@@ -5,8 +5,6 @@
 #
 # ---------------------------------------------------
 
-import pygame as pg
-
 __all__ = ['TIMESTEP','DEACT_TIME','KAPV_DEF','KAPB_DEF','KAPM_DEF','PERR_DEF',
            'LEFT','RIGHT','BOTTOM','TOP','HORIZONTAL','VERTICAL',
            'TIMEUP','SUCCESS','FAILURE','OUTOFBOUNDS','UNCERTAIN',
