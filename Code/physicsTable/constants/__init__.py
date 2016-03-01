@@ -7,25 +7,15 @@
 
 import pygame as pg
 
-__all__ = ['WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE',
-           'TIMESTEP','DEACT_TIME','KAPV_DEF','KAPB_DEF','KAPM_DEF','PERR_DEF',
+__all__ = ['TIMESTEP','DEACT_TIME','KAPV_DEF','KAPB_DEF','KAPM_DEF','PERR_DEF',
            'LEFT','RIGHT','BOTTOM','TOP','HORIZONTAL','VERTICAL',
            'TIMEUP','SUCCESS','FAILURE','OUTOFBOUNDS','UNCERTAIN',
            'REDGOAL','GREENGOAL','BLUEGOAL','YELLOWGOAL',
            'COLLTYPE_DEFAULT','COLLTYPE_WALL','COLLTYPE_BALL','COLLTYPE_GOAL','COLLTYPE_PAD',
-           'SHAPE_RECT','SHAPE_BALL','SHAPE_POLY','getConst','CENTER']
+           'SHAPE_RECT','SHAPE_BALL','SHAPE_POLY','getConst','CENTER',
+           'WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE']
 
-# Set color names
-WHITE = pg.Color('White')
-BLACK = pg.Color('Black')
-BLUE = pg.Color('Blue')
-RED = pg.Color('Red')
-GREEN = pg.Color('Green')
-GREY = pg.Color('Grey')
-LIGHTGREY = pg.Color('lightgrey')
-YELLOW = pg.Color('Yellow')
-GOLD = pg.Color('Gold')
-PURPLE = pg.Color('Purple')
+
 
 # Lenght of timestep
 TIMESTEP = 1/1000.
@@ -38,7 +28,18 @@ KAPV_DEF = 86.373
 KAPB_DEF = 21.545
 KAPM_DEF = 212327.787
 PERR_DEF = 10.814
-    
+
+WHITE = (255,255,255)
+BLACK = (0,0,0)
+BLUE = (0,0,255)
+RED = (255,0,0)
+GREEN = (0,255,0)
+GREY = (190,190,190)
+LIGHTGREY = (211,211,211)
+YELLOW = (255,255,0)
+GOLD = (255,215,0)
+PURPLE = (160,32,240)
+
 def getConst(key):
     constants = dict([(1,'LEFT'), (3,'RIGHT'), (2,'BOTTOM'), (4,'TOP'), (5,'HORIZONTAL'), (6,'VERTICAL'),(7,'CENTER'),
                   (101,'TIMEUP'),(102,'SUCCESS'),(103,'FAILURE'),(104,'OUTOFBOUNDS'),(105,'UNCERTAIN'),

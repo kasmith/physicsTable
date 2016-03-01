@@ -1,6 +1,7 @@
 from __future__ import division
 import pygame as pg
 import sys, os, time, copy
+from .objects import *
 
 
 def rectDiff(rbase, rsub):
@@ -11,19 +12,19 @@ def rectDiff(rbase, rsub):
     if rbase.width == runion.width:
         if rbase.top < runion.top:
             if rbase.bottom == runion.bottom:
-                return [pg.Rect(rbase.left,rbase.top,runion.width,runion.top - rbase.top)]
+                return [ptRect(rbase.left,rbase.top,runion.width,runion.top - rbase.top)]
             else:
-                return [pg.Rect(rbase.left,rbase.top,runion.width,runion.top - rbase.top), \
-                        pg.Rect(rbase.left,runion.bottom,runion.width,rbase.bottom - runion.bottom)]
+                return [ptRect(rbase.left,rbase.top,runion.width,runion.top - rbase.top), \
+                        ptRect(rbase.left,runion.bottom,runion.width,rbase.bottom - runion.bottom)]
         else:
-            return [pg.Rect(rbase.left,runion.bottom,runion.width,rbase.bottom - runion.bottom)]
+            return [ptRect(rbase.left,runion.bottom,runion.width,rbase.bottom - runion.bottom)]
     if rbase.height == runion.height:
         if rbase.left < runion.left:
             if rbase.right == runion.right:
-                return [pg.Rect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height)]
+                return [ptRect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height)]
             else:
-                return [pg.Rect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height), \
-                        pg.Rect(runion.right,rbase.top,rbase.right - runion.right, rbase.height)]
+                return [ptRect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height), \
+                        ptRect(runion.right,rbase.top,rbase.right - runion.right, rbase.height)]
         else:
             return [pg.Rect(runion.right,rbase.top,rbase.right-runion.right,rbase.height)]
             
@@ -31,37 +32,37 @@ def rectDiff(rbase, rsub):
         if rbase.left < runion.left:
             if rbase.right == runion.right:
                 if rbase.bottom == runion.bottom:
-                    return [pg.Rect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height), \
-                            pg.Rect(runion.left,rbase.top,runion.width,runion.top-rbase.top)]
+                    return [ptRect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height), \
+                            ptRect(runion.left,rbase.top,runion.width,runion.top-rbase.top)]
                 else:
-                    return [pg.Rect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
-                            pg.Rect(rbase.left,runion.top,runion.left - rbase.left, runion.height), \
-                            pg.Rect(rbase.left,runion.bottom,rbase.width,rbase.bottom - runion.bottom)]
+                    return [ptRect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
+                            ptRect(rbase.left,runion.top,runion.left - rbase.left, runion.height), \
+                            ptRect(rbase.left,runion.bottom,rbase.width,rbase.bottom - runion.bottom)]
             else:
-                return [pg.Rect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
-                        pg.Rect(rbase.left,runion.top,runion.left-rbase.left,runion.height), \
-                        pg.Rect(runion.right,runion.top,rbase.right - runion.right, runion.height)]
+                return [ptRect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
+                        ptRect(rbase.left,runion.top,runion.left-rbase.left,runion.height), \
+                        ptRect(runion.right,runion.top,rbase.right - runion.right, runion.height)]
             
         else:
             if rbase.bottom == runion.bottom:
-                return [pg.Rect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
-                        pg.Rect(runion.right,runion.top,rbase.right-runion.right,rbase.bottom-runion.top)]
+                return [ptRect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
+                        ptRect(runion.right,runion.top,rbase.right-runion.right,rbase.bottom-runion.top)]
             else:
-                return [pg.Rect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
-                        pg.Rect(runion.right,runion.top,rbase.right - runion.right, runion.height), \
-                        pg.Rect(rbase.left,runion.bottom,rbase.width,rbase.bottom - runion.bottom)]
+                return [ptRect(rbase.left,rbase.top,rbase.width,runion.top - rbase.top), \
+                        ptRect(runion.right,runion.top,rbase.right - runion.right, runion.height), \
+                        ptRect(rbase.left,runion.bottom,rbase.width,rbase.bottom - runion.bottom)]
     else:
         if rbase.left < runion.left:
             if rbase.right == runion.right:
-                return [pg.Rect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height), \
-                        pg.Rect(runion.left,runion.bottom,runion.width,rbase.bottom - runion.bottom)]
+                return [ptRect(rbase.left,rbase.top,runion.left-rbase.left,rbase.height), \
+                        ptRect(runion.left,runion.bottom,runion.width,rbase.bottom - runion.bottom)]
             else:
-                return [pg.Rect(rbase.left,rbase.top,runion.left - rbase.left, rbase.height), \
-                        pg.Rect(runion.left,runion.bottom,runion.width,rbase.bottom - runion.bottom), \
-                        pg.Rect(runion.right,rbase.top,rbase.right-runion.right,rbase.height)]
+                return [ptRect(rbase.left,rbase.top,runion.left - rbase.left, rbase.height), \
+                        ptRect(runion.left,runion.bottom,runion.width,rbase.bottom - runion.bottom), \
+                        ptRect(runion.right,rbase.top,rbase.right-runion.right,rbase.height)]
         else:
-            return [pg.Rect(rbase.left,runion.bottom,rbase.width,rbase.bottom-runion.bottom), \
-                    pg.Rect(runion.right,runion.top,rbase.right - runion.right,runion.height)]
+            return [ptRect(rbase.left,runion.bottom,rbase.width,rbase.bottom-runion.bottom), \
+                    ptRect(runion.right,runion.top,rbase.right - runion.right,runion.height)]
 
 def breakRect(r, breaklist):
     if len(breaklist) == 0: return [r]

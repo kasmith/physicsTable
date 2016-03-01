@@ -1,11 +1,7 @@
-
-
-
-
 from __future__ import division
-import sys, os, time
-from noisyTable import *
-from .utils.EasyMultithread import *
+from ..noisyTable import *
+from ..utils import async_map
+from multiprocessing import cpu_count
 import numpy as np
 
 class PointSimulation(object):
@@ -48,7 +44,7 @@ class PointSimulation(object):
     
     def runSimulation(self):
         
-        ret = multimap(self.singleSim,range(self.nsims), self.ucpus)
+        ret = async_map(self.singleSim,range(self.nsims), self.ucpus)
         
         self.outcomes = [r[0] for r in ret]
         self.endpts = [r[1] for r in ret]
@@ -89,7 +85,7 @@ class PointSimulation(object):
 
         if printout: print "Resimulating",len(idxs),"times"
 
-        ret = multimap(self.singleSim,range(len(idxs)), self.ucpus)
+        ret = async_map(self.singleSim,range(len(idxs)), self.ucpus)
         for i in range(len(idxs)):
             idx = idxs[i]
             self.outcomes[idx] = ret[i][0]
@@ -98,53 +94,3 @@ class PointSimulation(object):
             self.tsims[idx] = ret[i][3]
         self.replaceOutcomes(badoutcomes,printout)
 
-    def drawdensity(self, rp_wid = 5, greyscale = (0,255), gamadj = .2):
-        ptharray = np.zeros(table.dim)
-        
-        def singpth(i):
-            print i
-            n = makeNoisy(self.tab,self.kapv,self.kapb,self.kapm,self.perr)
-            r = n.simulate(self.maxtime, return_path = True, rp_wid = rp_wid)
-            print 'd',i
-            return r[1]
-        sims = map(singpth, range(self.nsims))
-        
-        print 'simulated'
-        for s in sims:
-            ptharray = np.add(ptharray,s)
-        paths = ptharray / np.max(ptharray)
-    
-        gsadj = greyscale[1] - greyscale[0]
-        #colarray = np.zeros(table.dim)
-        
-        print 'some adjustments'
-        n = makeNoisy(self.tab,None,None,None,None)
-        realpath = n.simulate(self.maxtime,return_path=True)[1]
-        
-        print 'real made'
-        
-        sc = table.draw()
-        #sarray = pg.surfarray.pixels3d(sc)
-        #print sarray
-        
-        print 'initial draw'
-        for i in range(table.dim[0]):
-            print i
-            for j in range(table.dim[1]):
-                if paths[i,j] > 0:
-                    tmpcol = int(greyscale[1] - gsadj * paths[i,j] * gamadj)
-                    if tmpcol < 0: tmpcol = 0
-                    #sarray[i,j] = (tmpcol,tmpcol,tmpcol)
-                    sc.set_at((i,j), pg.Color(tmpcol,tmpcol,tmpcol,255))
-                #else:
-                #    colarray[i,j] = 255
-    
-        
-        table.balls.draw(sc)
-        pg.draw.lines(sc, table.balls.col, False, realpath)
-        return sc
-        
-    def savepath(self, imgnm):
-        sc = self.drawdensity()
-        pg.image.save(sc, imgnm)
-   

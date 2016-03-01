@@ -6,12 +6,11 @@ from simpleTable import *
 import cPickle as pickle
 from math import sqrt
 import json
-from pygame import Color
 
 
 def safeListify(tolist):
 
-    if hasattr(tolist, '__iter__') or isinstance(tolist, Color):
+    if hasattr(tolist, '__iter__') or type(tolist).__name__ == 'Color':
         return [safeListify(l) for l in tolist]
     else:
         return tolist

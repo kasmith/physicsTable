@@ -1,9 +1,7 @@
 # Basic class for a table with ball(s)
 
 from __future__ import division
-from pygame.locals import *
 import pymunk as pm
-import pygame as pg
 import random, math
 from .constants import *
 from .objects import *
@@ -77,15 +75,10 @@ def check_counterclockwise(pointlist):
 
 class BasicTable(object):
     
-    def __init__(self, dims, closed_ends = [LEFT, RIGHT, BOTTOM, TOP], background_cl = WHITE, def_ball_rad = 20, def_ball_cl = BLUE,def_pad_len = 100, def_wall_cl = BLACK, def_occ_cl = GREY, def_pad_cl = BLACK, active = True, soffset = None, defscreen = None):
+    def __init__(self, dims, closed_ends = [LEFT, RIGHT, BOTTOM, TOP], def_ball_rad = 20, def_pad_len = 100, active = True):
         
         # Default characteristics
         self.dim = dims
-        self.bk_c = background_cl
-        self.dballc = def_ball_cl
-        self.dwallc = def_wall_cl
-        self.doccc = def_occ_cl
-        self.dpadc = def_pad_cl
         self.dballrad = def_ball_rad
         self.dpadlen = def_pad_len
         self.act = active
@@ -104,21 +97,7 @@ class BasicTable(object):
         self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_WALL, None, None,None, coll_func_ball_wall, tableref = ref(self))
         self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_PAD,None, None,None, coll_func_ball_pad, tableref = ref(self))
         
-        # Make surface and objects
-        dsurf = pg.display.get_surface()
-        if soffset is not None: self.soff = soffset
-        else: self.soff = (0,0)
-        if defscreen is None and dsurf is None: self.surface = pg.Surface(dims)
-        else:
-            if defscreen is None: defscreen = dsurf
-            if soffset is None:
-                bigdim = defscreen.get_size()
-                xoff = int((bigdim[0] - dims[0]) / 2.)
-                yoff = int((bigdim[1] - dims[1]) / 2.)
-                soffset = (xoff,yoff)
-                self.soff = soffset
-            thisrect = pg.Rect(soffset,dims)
-            self.surface = defscreen.subsurface(thisrect)
+
         self.balls = []
         self.walls = []
         self.occludes = []
@@ -128,7 +107,7 @@ class BasicTable(object):
         self.padhit = False
         
         self.stored_closed_ends = closed_ends
-        self.stored_soffset = soffset
+
         
         self.top = self.bottom = self.right = self.left = None
         for ce in closed_ends:
@@ -186,15 +165,6 @@ class BasicTable(object):
     
     def activate(self): self.act = True
     def deactivate(self): self.act = False
-    
-    def assignSurface(self, surface, offset = None):
-        if offset is None:
-            bigdim = surface.get_size()
-            xoff = int((bigdim[0] - self.dim[0]) / 2.)
-            yoff = int((bigdim[1] - self.dim[1]) / 2.)
-            offset = (xoff,yoff)
-        thisrect = pg.Rect(offset, self.dim)
-        self.surface = surface.subsurface(thisrect)
     
     def mostlyOcc(self,ball):
         bpos = ball.getpos()
@@ -261,7 +231,7 @@ class BasicTable(object):
             self.goalrettypes.append(onreturn)
         return newgoal
         
-    def addPaddle(self,p1, p2, padlen = None, padwid = 3, hitret = None, active = True, acol = BLACK, iacol = GREY, pthcol = LIGHTGREY, elast = 1., suppressoverwrite = False, pmsp = None):
+    def addPaddle(self,p1, p2, padlen = None, padwid = 3, hitret = None, active = True, acol = None, iacol = None, pthcol = None, elast = 1., suppressoverwrite = False, pmsp = None):
         if pmsp is None: pmsp = self.sp
         if active: sta = self.sp
         else: sta = None
@@ -284,21 +254,6 @@ class BasicTable(object):
         if not self.paddle: print "Can't toggle a missing paddle!"; return None
         if self.paddle.act: self.paddle.deactivate(self.sp)
         else: self.paddle.activate(self.sp, self.getRelativeMousePos())
-        
-    def draw(self, stillshow = False):
-        self.surface.fill(self.bk_c)
-        
-        if not stillshow:
-            for b in self.balls: b.draw(self.surface)
-        for o in self.occludes: o.draw(self.surface)
-        for w in self.walls: w.draw(self.surface)
-        for g in self.goals: g.draw(self.surface)
-        if stillshow:
-            for b in self.balls: b.draw(self.surface)
-        
-        if self.paddle: self.paddle.draw(self.surface)
-        
-        return self.surface
      
     # Default: does any ball overlap with any of the goals? Has it hit the paddle?
     def checkEnd(self):
@@ -328,10 +283,6 @@ class BasicTable(object):
     def step(self, t = 1/50., maxtime = None):
         substeps = t / self.basicts
         if substeps != int(substeps): print "Warning: steps not evenly divisible - off by", (substeps - int(substeps))
-        if self.paddle and pg.mouse.get_focused():
-            self.paddle.update(self.getRelativeMousePos())
-            #print any([sh == self.paddle.seg for sh in self.sp.shapes])
-            self.sp.reindex_shape(self.paddle.seg)
         if self.act:
             for i in range(int(substeps)):
                 self.on_step()
@@ -342,120 +293,3 @@ class BasicTable(object):
                 if maxtime and self.tm > maxtime: return TIMEUP
             return e
         else: return None
-    
-    def getRelativeMousePos(self):
-        mp = pg.mouse.get_pos()
-        oset = self.surface.get_offset()
-        return (mp[0]-oset[0],mp[1]-oset[1])
-        
-    def fastUpdate(self):
-        # Not a fast update... just flips
-        #pg.display.update([b.getboundrect().move(self.soff[0],self.soff[1]).inflate(b.getrad(),b.getrad()) for b in self.balls])
-        pg.display.update(self.surface.get_rect().move(self.soff[0],self.soff[1]))
-        #pg.display.update()
-        
-    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None, maxtime = None, waitafter = True):
-        frrate = int(1 / timesteps)
-        if maxtime is not None: maxsteps = int(frrate * maxtime)
-        else: maxsteps = 99999999999
-        
-        if screen is None:
-            screen = pg.display.get_surface()
-            
-        #screen.fill(WHITE)
-        offset = (int((screen.get_width() - self.dim[0])/2), int((screen.get_height() - self.dim[1])/2))
-        #screen.blit(self.draw(),offset)
-        self.draw()
-        pg.display.flip()
-        for event in pg.event.get(): pass # Flush queue
-        stp = 0
-        if retpath: rets = [[stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]]]
-        waiting = True
-        while waiting:
-            for event in pg.event.get():
-                if event.type == QUIT: sys.exit(0)
-                elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
-                elif event.type == MOUSEBUTTONDOWN: waiting = False
-        
-        clk = pg.time.Clock()
-        running = True
-        while running:
-            if self.step(timesteps) is not None: running = False
-            stp += 1
-            fpsstr = "FPS: " + str(clk.get_fps())
-            #if retpath: rets.append([stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]])
-            #screen.fill(WHITE)
-            #screen.blit(self.draw(),offset)
-            self.draw()
-            pg.display.set_caption(fpsstr)
-            #pg.display.flip()
-            self.fastUpdate()
-            clk.tick(frrate)
-            for event in pg.event.get():
-                if event.type == QUIT: sys.exit(0)
-                elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
-                elif event.type == MOUSEBUTTONDOWN and onclick:
-                    onclick(self)
-            if stp == maxsteps: running = False
-        
-        #if self.mostlyOcc(): return False
-        self.draw()
-        pg.display.flip()
-        
-        waiting = waitafter
-        while waiting:
-            for event in pg.event.get():
-                if event.type == QUIT: sys.exit(0)
-                elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
-                elif event.type == MOUSEBUTTONDOWN: waiting = False
-        
-        #if retpath: return [self.tm, rets]
-        return self.tm
-    
-    def makeMovie(self, moviename, outputdir = '.', fps = 20, removeframes = True, maxtime = None):
-        
-        spl = moviename.split('.')
-        if len(spl) == 2 and spl[1] != 'mov':
-            warnings.warn('Incorrect extension - requires .mov')
-            return None
-        elif len(spl) == 2: moviename = spl[0]
-        
-        try:
-            subprocess.call('ffmpeg',stdout = open(os.devnull,'w'),stderr=subprocess.STDOUT)
-        except:
-            warnings.warn('ffmpeg not installed - required to make movie')
-            return None
-        
-        pthnm = os.path.join(outputdir, 'tmp_' + moviename)
-        if not os.path.isdir(pthnm):
-            os.mkdir(pthnm)
-        
-        if os.listdir(pthnm) != []:
-            warnings.warn("Files exist in temporary directory " + pthnm + '; delete and try again')
-            return None
-        
-        timeperframe = 1. / fps
-        tnmbase = os.path.join(pthnm, moviename+'_%04d.png')
-        
-        pg.image.save(self.draw(),tnmbase % 0)
-        i = 1
-        running = True
-        while running:
-            e = self.step(t = timeperframe, maxtime = maxtime)
-            pg.image.save(self.draw(),tnmbase % i)
-            i += 1
-            
-            if e is not None: running = False
-        
-        
-        ffcall = 'ffmpeg -y -r ' + str(fps) + ' -i ' + tnmbase + ' -pix_fmt yuv420p ' + os.path.join(outputdir, moviename + '.mov')
-        ffargs = shlex.split(ffcall)
-        print ffargs
-        subprocess.call(ffargs)
-        
-        if removeframes:
-            shutil.rmtree(pthnm)
-        
-        return True
-        
-            

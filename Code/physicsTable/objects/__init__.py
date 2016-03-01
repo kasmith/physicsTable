@@ -1,10 +1,72 @@
 from __future__ import division
 from physicsTable.constants import *
-import pygame as pg
 import pymunk as pm
 from weakref import ref
 
-__all__ = ['Ball', 'Wall','Occlusion','Goal','AbnormWall','Paddle']
+__all__ = ['Ball', 'Wall','Occlusion','Goal','AbnormWall','Paddle','ptRect']
+
+# A class that replicates some of the basic functionality of pygame's Rect to avoid using pygame
+class ptRect(object):
+    def __init__(self,left,top,width=None,height=None):
+        if width == None and height == None:
+            width,height = top
+            left,top = left
+        right = left + width
+        bottom = top + height
+        self.width = width
+        self.height = height
+        self.left = left
+        self.top = top
+        self.right = right
+        self.bottom = bottom
+        self.topleft = (left,top)
+        self.bottomleft = (left,bottom)
+        self.topright = (right,top)
+        self.bottomright = (right,bottom)
+
+    def clip(self,Rect):
+        newl = max(self.left,Rect.left)
+        newr = min(self.right,Rect.right)
+        newt = max(self.top,Rect.top)
+        newb = min(self.bottom,Rect.bottom)
+        if newl >= newr or newt >= newb: return ptRect(self.left,self.top,0,0)
+        neww = newr - newl
+        newh = newb - newt
+        return ptRect(newl,newt,neww,newh)
+
+    def collidepoint(self,x,y=None):
+        if y is None: x,y = x
+        return (x > self.left and x < self.right and y > self.top and y < self.bottom)
+
+    # Two rectangles collide if their overlap is non-zero
+    def colliderect(self,Rect):
+        clr = self.clip(Rect)
+        return (clr.width != 0 and clr.height != 0)
+
+    def collidelist(self,list):
+        for i in range(len(list)):
+            if self.colliderect(list[i]): return i
+        return -1
+
+    def collidelistall(self,list):
+        if r in list:
+            if not self.colliderect(r): return False
+        return True
+
+    def contains(self,Rect):
+        if self.left <= Rect.left and self.right >= Rect.right and \
+                        self.top <= Rect.top and self.bottom >= Rect.bottom:
+            return 1
+        else:
+            return 0
+
+    def inflate(self,x,y):
+        newl = self.left - x
+        newt - self.top - y
+        neww = self.width + x*2
+        newh = self.height + y*2
+        return ptRect(newl,newt,neww,newh)
+
 
 class Ball(object):
     def __init__(self, initpos, initvel, rad, color, elast, pmsp = None, layer = None):
@@ -21,7 +83,7 @@ class Ball(object):
                 print "Layer must be between 1 and 31 - defaulting to all layers"
             else:
                 self.circle.layers = 2**layer
-        self.r = pg.Rect(initpos[0]-rad,initpos[1]-rad,2*rad,2*rad)
+        self.r = ptRect(initpos[0]-rad,initpos[1]-rad,2*rad,2*rad)
         self.sp = ref(pmsp)
         
         self.col = color
@@ -38,8 +100,10 @@ class Ball(object):
         self.body.position = pm.Vec2d(pos)
         self.circle.cache_bb()
     def getboundrect(self):
-        self.r.center = self.getpos()
-        return self.r
+        #self.r.center = self.getpos()
+        x,y = self.getpos()
+        rad = self.getrad()
+        return ptRect(x-rad,y-rad,2*rad,2*rad)
     
     def stop(self): self.body.velocity = pm.Vec2d([0,0])
     def detach(self): 
@@ -51,9 +115,7 @@ class Ball(object):
         #print self.sp().bodies
         self.stop()
         self.detach()
-    
-    def draw(self, screen): pg.draw.circle(screen, self.col, map(int,self.getpos()), self.getrad())
-    
+
     def toStr(self):
         return "Ball object - pos: " + str(self.getpos()) + "; vel: " + str(self.getvel())
     
@@ -61,7 +123,7 @@ class Wall(object):
     def __init__(self, upperleft, lowerright, color, elast, stb, pmsp = None):
         w = lowerright[0] - upperleft[0]
         h = lowerright[1] - upperleft[1]
-        rect = pg.Rect(upperleft,(w,h))
+        rect = ptRect(upperleft,(w,h))
         self.poly = pm.Poly(stb,[rect.topleft, rect.topright,rect.bottomright,rect.bottomleft])
         self.poly.elasticity = elast
         self.poly.collision_type = COLLTYPE_WALL
@@ -69,9 +131,6 @@ class Wall(object):
         self.r = rect
         self.shapetype = SHAPE_RECT
         self.sp = ref(pmsp)
-        
-    
-    def draw(self,screen): pg.draw.rect(screen,self.col,self.r)
     
     def toStr(self):
         return "Wall object - ul: " + str(self.r.topleft) + "; lr: " + str(self.r.bottomright) 
@@ -80,10 +139,8 @@ class Occlusion(object):
     def __init__(self, upperleft, lowerright, color):
         w = lowerright[0] - upperleft[0]
         h = lowerright[1] - upperleft[1]
-        self.r = pg.Rect(upperleft,(w,h))
+        self.r = ptRect(upperleft,(w,h))
         self.col = color
-        
-    def draw(self, screen): pg.draw.rect(screen, self.col, self.r)
     
     def toStr(self):
         return "Occlusion object - ul: " + str(self.r.topleft) + "; lr: " + str(self.r.bottomright) 
@@ -92,13 +149,9 @@ class Goal(object):
     def __init__(self, upperleft, lowerright, color, onreturn):
         w = lowerright[0] - upperleft[0]
         h = lowerright[1] - upperleft[1]
-        self.r = pg.Rect(upperleft,(w,h))
+        self.r = ptRect(upperleft,(w,h))
         self.col = color
         self.ret = onreturn
-            
-            
-    def draw(self,screen):
-        if self.col is not None: pg.draw.rect(screen,self.col,self.r)
         
     def toStr(self):
         return "Goal object - ul: " + str(self.r.topleft) + "; lr: " + str(self.r.bottomright) + "; return value: " + str(self.ret)
@@ -112,8 +165,6 @@ class AbnormWall(Wall):
         self.col = color
         self.shapetype = SHAPE_POLY
         self.sp = ref(pmsp)
-        
-    def draw(self,screen): pg.draw.polygon(screen,self.col,self.poly.get_vertices())
     
     def toStr(self):
         ret = "AbnormWall object - vertices: "
@@ -127,7 +178,7 @@ class AbnormWall(Wall):
         height = bb.bottom - bb.top
         left = bb.left
         width = bb.right - bb.left
-        return pg.Rect(left,top,width,height)
+        return ptRect(left,top,width,height)
     
 class Paddle(object):
     def __init__(self,p1, p2, length, actcolor, inactcolor, pathcolor, width, hitreturn, spacetoadd,elast,stb, pmsp):
@@ -195,7 +246,7 @@ class Paddle(object):
             left = self.otherpos - int(self.wid / 2)
             height = (self.uprbound - self.lwrbound) + self.hlen*2
             width = self.wid
-        return pg.Rect(left, top, width, height)
+        return ptRect(left, top, width, height)
         
     def activate(self, space = None, mp = (0,0)):
         if space is None: space = self.sp
@@ -222,19 +273,7 @@ class Paddle(object):
         self.act = False
         space.remove(self.seg)
         
-    def draw(self,screen):
-        ps = self.getendpts()
-        if self.act: c = self.col
-        else: c= self.iacol
-        if self.pcol:
-            if self.dir == HORIZONTAL:
-                p1 = (self.lwrbound - self.hlen, self.otherpos)
-                p2 = (self.uprbound + self.hlen, self.otherpos)
-            else:
-                p1 = (self.otherpos, self.lwrbound - self.hlen)
-                p2 = (self.otherpos, self.uprbound + self.hlen)
-            pg.draw.line(screen, self.pcol, p1,p2, 1)
-        pg.draw.line(screen, c, ps[0], ps[1], self.wid)
+
         
     def toStr(self):
         ret = "Paddle object - direction: "

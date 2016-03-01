@@ -10,13 +10,12 @@ from __future__ import division
 import numpy as np
 import cPickle as pickle
 from .constants import *
-from .utils.EasyMultithread import *
 from trials import *
 from simpleTable import *
 from noisyTable import *
-from multiprocessing import Pool
-from .utils.dillMultithreading import *
-import random, copy
+from multiprocessing import Pool, cpu_count
+from .utils import async_map, apply_async
+import random, copy, os
 
 # Unsafe translation of a number between 0 and 256^2-1 to a two character
 def toBin(i):
@@ -27,20 +26,46 @@ def toBin(i):
 def fromBin(s):
     return ord(s[0])*256 + ord(s[1])
 
+def makeFileName(trnm,kapv,kapb,kapm,perr,nsims,path = '.'):
+    kv = str(np.round(kapv))
+    kb = str(np.round(kapb))
+    km = str(np.round(kapm))
+    pe = str(np.round(perr))
+    pthname = kv + '_' + kb + '_' + km + '_' + pe + '_' + str(nsims)
+    return os.path.join(path,pthname,trnm+'.pmo')
+
+def loadPaths(trial,kapv,kapb,kapm,perr,nsims=200,path = '.'):
+    trpth = makeFileName(trial.name,kapv,kapb,kapm,perr,nsims,path)
+    if not os.path.exists(trpth):
+        print 'Nothing existing for trial ' + trial.name +'; making now'
+        print 'Saving into: ' + trpth
+        trdir = os.path.dirname(trpth)
+        if not os.path.exists(trdir): os.makedirs(trdir)
+        pm = PathMaker(trial,kapv,kapb,kapm,perr,nsims)
+        pm.save(trpth)
+    else:
+        pm = loadPathMaker(trpth)
+    return pm
+
 class Path(object):
     def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True):
         ntab = makeNoisy(tab,kv,kb,km,pe)
-        self.o, self.p = ntab.simulate(tl,ts,True)
+        self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         # Make sure that we get a valid goal
         while (self.o is TIMEUP or self.o is OUTOFBOUNDS) and enforcegoal:
             ntab = makeNoisy(tab,kv,kb,km,pe)
-            self.o, self.p = ntab.simulate(tl,ts,True)
+            self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         self.maxtime = len(self.p)*ts
         # Test for compression possibilities
         maxpt = max(map(max,self.p))
         minpt = min(map(min,self.p))
         self.len = len(self.p)
         if maxpt > 256*256-1 or minpt < 0: raise Exception('Path out of bounds - not compressible')
+        if max(self.b) > 255: raise Exception('Too many bounces to compress')
+        self.maxbounce = max(self.b)
+        self.ts = ts
+        self.tl = tl
+        self.initt = tab.tm
 
     def compress(self):
         if self.p is None: raise Exception('Already compressed!')
@@ -48,6 +73,10 @@ class Path(object):
         for p in self.p: st += toBin(p[0]) + toBin(p[1])
         self.comp = st
         self.p = None
+        bst = ""
+        for b in self.b: st += chr(b)
+        self.compb = bst
+        self.b = None
 
     def decompress(self):
         if self.comp is None: raise Exception('Already uncompressed')
@@ -60,6 +89,17 @@ class Path(object):
             i += 4
         if len(self.p) != self.len: raise Exception('Length mismatch - decompression error!')
         self.comp = None
+        self.b = []
+        for i in len(self.compb):
+            self.b.append(ord(self.compb[i]))
+        if len(self.b) != self.len: raise Exception('Length mismatch (bounce) - decompression error!')
+        self.compb = None
+
+    def getpos(self,t):
+        if self.p is None: self.decompress()
+        if t > self.tl: return None
+        i = int(t/self.ts)
+        return self.p[i]
 
 
 class PathMaker(object):
@@ -86,6 +126,7 @@ class PathMaker(object):
         r = None
         while r is None: r = tab.step(self.pdist)
         maxtm = tab.tm
+        self.maxtm = maxtm
         ntms = int(np.ceil(maxtm / self.pdist))
         tms = [self.pdist*t for t in range(ntms)]
         pths = async_map(self.makePathSingTime,tms,self.ncpu)
@@ -132,6 +173,10 @@ class PathMaker(object):
         pths = self.paths[str(time)]
         rs = random.sample(pths,n)
         return [(r.o,r.p) for r in rs]
+
+    def getSinglePath(self, time):
+        pths = self.paths[str(time)]
+        return random.choice(pths)
 
 def loadPathMaker(flnm):
     fl = open(flnm,'rU')

@@ -1,11 +1,9 @@
 from __future__ import division
 import os, sys, time, copy, bisect, random
 
-from noisyTable import *
-from trials import *
-from .utils.EasyMultithread import multimap
-import numpy as np
-from .utils.mvncdf import mvnormcdf
+from ..noisyTable import *
+from ..trials import *
+from ..utils import *
 from scipy.stats import norm
 import numpy as np
 
@@ -73,7 +71,6 @@ class Path(object):
         pos = self.getpos(parentmodel.t)
         if not parentmodel.table.fullyOcc():
             dist = euclidist(pos, parentmodel.table.balls.getpos())
-            #print dist, parenttable.perr, normpdf(dist,0,parenttable.perr)
             return norm.pdf(dist,loc = 0,scale = parentmodel.pe)
         else:
             # If the particle is in the goal while the ball is covered, it shouldn't be
@@ -92,9 +89,6 @@ class Path(object):
             
             # Break up occluders into non-overlapping, then run
             uoccs = uniqueOccs(map(lambda x: x.r, parentmodel.table.occludes), blocked)
-            #print map(lambda x: x.r, parenttable.table.occludes)
-            #print blocked
-            #print uoccs
             for o in uoccs:
                 lefto = o.left
                 righto = o.right
@@ -102,12 +96,10 @@ class Path(object):
                 boto = o.bottom
 
                 tst = mvnormcdf([lefto,topo],[righto,boto],pos,covmat)
-                #if tst < 0: print o, pos, tst
                 p += mvnormcdf([lefto,topo],[righto,boto],pos,covmat)
 
                 ps.append(p)
-                
-            #if p < 0: print p, ps, uoccs
+
             return p
                 
 
@@ -186,7 +178,8 @@ class PathFilter(object):
         for p in newps: p.weight = 1
         self.particles = newps
         return r
-    
+
+    ''' MOVE TO VISUALIZATION
     def draw(self, drawlines = False):
         sc = self.table.draw()
         for part, p in zip(self.particles, self.getPartPs()):
@@ -243,5 +236,5 @@ class PathFilter(object):
         
         if removeframes:
             shutil.rmtree(pthnm)
-        
+    '''
         

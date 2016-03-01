@@ -16,7 +16,6 @@
 from __future__ import division
 from basicTable import *
 from .objects import *
-import time
 
 class SimpleTable(BasicTable):
     
@@ -45,21 +44,6 @@ class SimpleTable(BasicTable):
         if self.balls is None: return True
         self.sp.remove(self.balls.body, self.balls.circle)
         self.balls = None
-    
-    def draw(self, stillshow = False):
-        self.surface.fill(self.bk_c)
-        
-        if not stillshow:
-            if self.balls: self.balls.draw(self.surface)
-        for o in self.occludes: o.draw(self.surface)
-        for w in self.walls: w.draw(self.surface)
-        for g in self.goals: g.draw(self.surface)
-        if stillshow:
-            if self.balls: self.balls.draw(self.surface)
-        
-        if self.paddle: self.paddle.draw(self.surface)
-        
-        return self.surface
     
     def addBounce(self, shapeobj):
         if self.balls and self.balls.circle == shapeobj: self.balls.bounces += 1
@@ -92,18 +76,8 @@ class SimpleTable(BasicTable):
         for g in self.goals:
             if ball_rect_collision(self.balls,g.r): return g.ret
         return None
-    
-    #def fastUpdate(self):
-    #    r = self.balls.getrad()
-    #    pg.display.update(self.balls.getboundrect().move(self.soff[0],self.soff[1]).inflate(r,r))
-        
-    def demonstrate(self, screen = None, timesteps = 1./50, retpath = False, onclick = None,maxtime = None,waitafter = True):
-        tm = super(SimpleTable, self).demonstrate(screen, timesteps, retpath, onclick, maxtime,waitafter)
-        p = self.balls.getpos()
-        if retpath: return [p, tm[0], tm[1]]
-        else: return [p, tm]
-        
-    def simulate(self, maxtime = 50., timeres = None, return_path = False, rp_wid = None):
+
+    def simulate(self, maxtime = 50., timeres = None, return_path = False,return_bounces = False, rp_wid = None):
         if timeres is None: timeres = self.basicts
         if return_path:
             bx = int(self.balls.getpos()[0])
@@ -118,6 +92,9 @@ class SimpleTable(BasicTable):
             else:
                 path = []
                 path.append( (bx, by) )
+        if return_bounces:
+            bnc = []
+            bnc.append(0)
         running = True
         while running:
             
@@ -134,15 +111,20 @@ class SimpleTable(BasicTable):
                             path[i,j] = max(col,path[i,j])
                 else:
                     path.append( (bx, by) )
+            if return_bounces:
+                bnc.append(self.balls.bounces)
         
-        if return_path: return [r, path]
-        else: return r
+        if return_path:
+            if return_bounces:
+                return [r, path,bnc]
+            else:
+                return [r,path]
+        else:
+            if return_bounces:
+                return [r,bnc]
+            else:
+                return r
         
-    def drawPath(self, pathcl = None):
-        if pathcl is None: pathcl = self.balls.col
-        sc = self.draw()
-        r, p = self.simulate(return_path = True)
-        pg.draw.lines(sc,pathcl, False, p)
-        return sc
+
             
     

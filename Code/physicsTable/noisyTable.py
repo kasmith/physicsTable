@@ -13,7 +13,6 @@ import sys,os
 from simpleTable import *
 import random
 import numpy as np
-import pygame as pg
 import pymunk as pm
 
 def velAngle(vx,vy):

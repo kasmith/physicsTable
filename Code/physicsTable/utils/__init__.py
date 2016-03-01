@@ -1,11 +1,14 @@
 
 
-__all__ = ['multimap', 'mvstdnormcdf', 'mvnormcdf', 'speedTest','SimpleSPSA','displayInstructions','mousePos',
-           'FONT_L','FONT_M','FONT_S','FONT_VL', 'screenPause', 'async_map']
+__all__ = ['mvstdnormcdf', 'mvnormcdf', 'SimpleSPSA','async_map','apply_async','euclidist',
+           'MakeSmoother','SmoothFromPre','SmoothNShift']
 
-from EasyMultithread import multimap
 from mvncdf import mvstdnormcdf, mvnormcdf
-from speedTestPath import speedTest
 from SPSA import SimpleSPSA
-from pyText import *
 from dillMultithreading import async_map, apply_async
+from smoothNShift import MakeSmoother, SmoothFromPre, SmoothNShift
+
+def euclidist(p1, p2):
+    dx = p1[0]-p2[0]
+    dy = p1[1]-p2[1]
+    return np.sqrt( dx*dx + dy*dy )
