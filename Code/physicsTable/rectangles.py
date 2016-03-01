@@ -1,5 +1,4 @@
 from __future__ import division
-import pygame as pg
 import sys, os, time, copy
 from .objects import *
 
