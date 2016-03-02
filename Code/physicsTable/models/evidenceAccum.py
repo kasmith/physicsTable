@@ -47,10 +47,15 @@ class EvidenceAccumulation(object):
         self.km = kapm
         self.pe = perr
         self.nsim = nsims
+        self.nevs = nevpath
         self.pm = loadPaths(trial,kapv,kapb,kapm,perr,nevpath,pmpath)
         self.e1 = end1type
         self.e2 = end2type
+        self.pmpath = pmpath
         self.resetEvidence()
+
+    def reconstructPaths(self):
+        self.pm = loadPaths(self.trial,self.kv,self.kb,self.km,self.pe,self.nevs,self.pmpath)
 
     def resetEvidence(self):
         t = 0.
@@ -100,7 +105,42 @@ class EvidenceAccumulation(object):
         op2 = SmoothFromPre(self,ptype2,self.sm)
         self.odec = [np.array([p1,p2,1.-p1-p2]) for p1,p2 in zip(op1,op2)]
 
+    def setOffsetBySM(self,sm):
+        self.sm = sm
+        self.toff = sm['Offset'] * self.pm.pdist
+        self.twid = sm['Width'] * self.pm.pdist
+        op1 = SmoothFromPre(self.ptype1,self.sm)
+        op2 = SmoothFromPre(self,ptype2,self.sm)
+        self.odec = [np.array([p1,p2,1.-p1-p2]) for p1,p2 in zip(op1,op2)]
+
     def getDecisions(self):
         if self.odec is None: raise Exception('Decisions not yet set')
         return self.odec
+
+    def save(self,flnm = None,asstring = False):
+        # Delete the PathMaker - can always be reloaded
+        self.pm = None
+        if asstring:
+            return pickle.dumps(self,protocol=2)
+        else:
+            if flnm is None:
+                flnm = self.tnm + '_ea.eam'
+            fl = open(flnm,'w')
+            pickle.dump(self,fl,protocol=2)
+            fl.close()
+
+def loadEvidenceAccum(filename=None,serialized=None)
+    if filename is not None and serialized is not None:
+        raise Exception('Cannot load from both file and string!')
+    if filename is None and serialized is None:
+        raise Exception('Nothing to load!')
+    if filename is not None:
+        fl = open(filename,'rU')
+        ea = pickle.load(fl)
+        fl.close()
+    else:
+        ea = pickle.loads(serialized)
+    ea.reconstructPaths()
+    return ea
+
 
