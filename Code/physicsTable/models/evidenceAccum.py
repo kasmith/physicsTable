@@ -129,7 +129,7 @@ class EvidenceAccumulation(object):
             pickle.dump(self,fl,protocol=2)
             fl.close()
 
-def loadEvidenceAccum(filename=None,serialized=None)
+def loadEvidenceAccum(filename=None,serialized=None):
     if filename is not None and serialized is not None:
         raise Exception('Cannot load from both file and string!')
     if filename is None and serialized is None:

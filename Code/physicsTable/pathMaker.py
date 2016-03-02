@@ -74,7 +74,7 @@ class Path(object):
         self.comp = st
         self.p = None
         bst = ""
-        for b in self.b: st += chr(b)
+        for b in self.b: bst += chr(b)
         self.compb = bst
         self.b = None
 
@@ -90,7 +90,7 @@ class Path(object):
         if len(self.p) != self.len: raise Exception('Length mismatch - decompression error!')
         self.comp = None
         self.b = []
-        for i in len(self.compb):
+        for i in range(len(self.compb)):
             self.b.append(ord(self.compb[i]))
         if len(self.b) != self.len: raise Exception('Length mismatch (bounce) - decompression error!')
         self.compb = None
