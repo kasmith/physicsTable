@@ -71,7 +71,7 @@ class Path(object):
         self.initt = tab.tm
         del ntab
         if verbose:
-            print "Done with path; ", tab.name, tab.tm, "; redos:",nbads
+            print "Done with path; ", tab.tm, "; redos:",nbads
 
     def compress(self):
         if self.p is None: raise Exception('Already compressed!')
