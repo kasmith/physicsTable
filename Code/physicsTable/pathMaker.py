@@ -34,26 +34,29 @@ def makeFileName(trnm,kapv,kapb,kapm,perr,nsims,path = '.'):
     pthname = kv + '_' + kb + '_' + km + '_' + pe + '_' + str(nsims)
     return os.path.join(path,pthname,trnm+'.pmo')
 
-def loadPaths(trial,kapv,kapb,kapm,perr,nsims=200,path = '.'):
+def loadPaths(trial,kapv,kapb,kapm,perr,nsims=200,path = '.',verbose=False):
     trpth = makeFileName(trial.name,kapv,kapb,kapm,perr,nsims,path)
     if not os.path.exists(trpth):
         print 'Nothing existing for trial ' + trial.name +'; making now'
         print 'Saving into: ' + trpth
         trdir = os.path.dirname(trpth)
         if not os.path.exists(trdir): os.makedirs(trdir)
-        pm = PathMaker(trial,kapv,kapb,kapm,perr,nsims)
+        pm = PathMaker(trial,kapv,kapb,kapm,perr,nsims,verbose=verbose)
         pm.save(trpth)
     else:
         pm = loadPathMaker(trpth)
     return pm
 
 class Path(object):
-    def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True):
+    def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True,verbose = False):
         ntab = makeNoisy(tab,kv,kb,km,pe)
+        nbads = 0
         self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         # Make sure that we get a valid goal
         while (self.o is TIMEUP or self.o is OUTOFBOUNDS) and enforcegoal:
+            del ntab
             ntab = makeNoisy(tab,kv,kb,km,pe)
+            nbads += 1
             self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         self.maxtime = len(self.p)*ts
         # Test for compression possibilities
@@ -66,6 +69,9 @@ class Path(object):
         self.ts = ts
         self.tl = tl
         self.initt = tab.tm
+        del ntab
+        if verbose:
+            print "Done with path; ", tab.name, tab.tm, "; redos:",nbads
 
     def compress(self):
         if self.p is None: raise Exception('Already compressed!')
@@ -104,7 +110,7 @@ class Path(object):
 
 class PathMaker(object):
 
-    def __init__(self,trial, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, npaths = 100, pathdist = .1, timelen = 60., timeres = 0.05, cpus = cpu_count()):
+    def __init__(self,trial, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, npaths = 100, pathdist = .1, timelen = 60., timeres = 0.05, cpus = cpu_count(),verbose = False):
         self.trial = trial
         self.npaths = npaths
         self.kv = kapv
@@ -116,9 +122,9 @@ class PathMaker(object):
         self.pdist = pathdist
         self.ncpu = cpus
 
-        self.makePaths()
+        self.makePaths(verbose)
 
-    def makePaths(self):
+    def makePaths(self,verbose=False):
         self.paths = dict()
 
         # Get the runtime of the table
@@ -129,17 +135,18 @@ class PathMaker(object):
         self.maxtm = maxtm
         ntms = int(np.ceil(maxtm / self.pdist))
         tms = [self.pdist*t for t in range(ntms)]
-        pths = async_map(self.makePathSingTime,tms,self.ncpu)
+        def f(t): return(self.makePathSingTime(t,verbose))
+        pths = async_map(f,tms,self.ncpu)
         #pths = map(self.makePathSingTime,tms) # PUT async_map BACK!!!!
         for t,p in zip(tms,pths):
             rndtm = str(t)
             self.paths[rndtm] = p
 
-    def makePathSingTime(self,t):
+    def makePathSingTime(self,t,verbose = False):
         tab = self.trial.makeTable()
         while tab.tm < t:
             tab.step(self.pdist)
-        return map(lambda x: Path(tab,self.kv,self.kb,self.km,self.pe,self.time,self.res),range(self.npaths))
+        return map(lambda x: Path(tab,self.kv,self.kb,self.km,self.pe,self.time,self.res,verbose=verbose),range(self.npaths))
 
     def compressPaths(self):
         for k in self.paths.keys():

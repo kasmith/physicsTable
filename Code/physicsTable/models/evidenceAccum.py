@@ -91,11 +91,17 @@ class EvidenceAccumulation(object):
         self.thresh = None
         self.decs = ev2Dec(self.cumev,threshold,self.e1,self.e2)
         self.aggdec = [countArray(d) for d in self.decs]
-        self.ptype1 = None
-        self.ptype2 = None
+        self.ptype1 = []
+        self.ptype2 = []
         for i in range(len(self.aggdec)):
-            self.ptype1.append(self.aggdec[i][self.e1] / self.nsim)
-            self.ptype2.append(self.aggdec[i][self.e2] / self.nsim)
+            if self.e1 in self.aggdec[i].keys():
+                self.ptype1.append(self.aggdec[i][self.e1] / self.nsim)
+            else:
+                self.ptype1.append(0.)
+            if self.e2 in self.aggdec[i].keys():
+                self.ptype2.append(self.aggdec[i][self.e2] / self.nsim)
+            else:
+                self.ptype2.append(0.)
 
     def setOffset(self,toff,twid,maxn = 101):
         self.toff = toff
@@ -110,7 +116,7 @@ class EvidenceAccumulation(object):
         self.toff = sm['Offset'] * self.pm.pdist
         self.twid = sm['Width'] * self.pm.pdist
         op1 = SmoothFromPre(self.ptype1,self.sm)
-        op2 = SmoothFromPre(self,ptype2,self.sm)
+        op2 = SmoothFromPre(self.ptype2,self.sm)
         self.odec = [np.array([p1,p2,1.-p1-p2]) for p1,p2 in zip(op1,op2)]
 
     def getDecisions(self):
