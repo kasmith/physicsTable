@@ -53,7 +53,7 @@ class Path(object):
         nbads = 0
         self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         # Make sure that we get a valid goal
-        while (self.o is TIMEUP or self.o is OUTOFBOUNDS) and enforcegoal:
+        while (self.o is TIMEUP or self.o is OUTOFBOUNDS or ntab.balls.bounces > 255) and enforcegoal:
             del ntab
             ntab = makeNoisy(tab,kv,kb,km,pe)
             nbads += 1
