@@ -68,7 +68,6 @@ class EvidenceAccumulation(object):
             self.obs.append(o)
             self.bounces.append(b)
             t += self.pm.pdist
-        self.obs = timepaths
         self.ev = obs2Ev(self.obs,self.e1,self.e2)
 
         # Reset everything else
