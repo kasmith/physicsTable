@@ -48,10 +48,11 @@ class EvidenceAccumulation(object):
         self.pe = perr
         self.nsim = nsims
         self.nevs = nevpath
-        self.pm = loadPaths(trial,kapv,kapb,kapm,perr,nevpath,pmpath)
+        #self.pm = loadPaths(trial,kapv,kapb,kapm,perr,nevpath,pmpath)
         self.e1 = end1type
         self.e2 = end2type
         self.pmpath = pmpath
+        self.pdist = None
         self.resetEvidence()
 
     def reconstructPaths(self):
@@ -61,14 +62,16 @@ class EvidenceAccumulation(object):
         t = 0.
         self.obs = []
         self.bounces = []
-        while t < self.pm.maxtm:
-            oab = self.pm.getOutcomesAndBounces(t,self.nsim)
+        pm = loadPaths(self.trial,self.kv,self.kb,self.km,self.pe,self.nevs,self.pmpath)
+        while t < pm.maxtm:
+            oab = pm.getOutcomesAndBounces(t,self.nsim)
             o = map(lambda x: x[0],oab)
             b = map(lambda x: x[1][-1],oab)
             self.obs.append(o)
             self.bounces.append(b)
-            t += self.pm.pdist
+            t += pm.pdist
         self.ev = obs2Ev(self.obs,self.e1,self.e2)
+        if self.pdist is None: self.pdist = pm.pdist
 
         # Reset everything else
         self.cumev = None
@@ -110,15 +113,15 @@ class EvidenceAccumulation(object):
     def setOffset(self,toff,twid,maxn = 101):
         self.toff = toff
         self.twid = twid
-        self.sm = MakeSmoother(maxn, toff / self.pm.pdist, twid / self.pm.pdist)
+        self.sm = MakeSmoother(maxn, toff / self.pdist, twid / self.pdist)
         op1 = SmoothFromPre(self.ptype1,self.sm)
         op2 = SmoothFromPre(self,ptype2,self.sm)
         self.odec = [np.array([p1,p2,1.-p1-p2]) for p1,p2 in zip(op1,op2)]
 
     def setOffsetBySM(self,sm):
         self.sm = sm
-        self.toff = sm['Offset'] * self.pm.pdist
-        self.twid = sm['Width'] * self.pm.pdist
+        self.toff = sm['Offset'] * self.pdist
+        self.twid = sm['Width'] * self.pdist
         op1 = SmoothFromPre(self.ptype1,self.sm)
         op2 = SmoothFromPre(self.ptype2,self.sm)
         self.odec = [np.array([p1,p2,1.-p1-p2]) for p1,p2 in zip(op1,op2)]
@@ -129,7 +132,7 @@ class EvidenceAccumulation(object):
 
     def save(self,flnm = None,asstring = False):
         # Delete the PathMaker - can always be reloaded
-        self.pm = None
+
         if asstring:
             return pickle.dumps(self,protocol=2)
         else:
@@ -150,7 +153,7 @@ def loadEvidenceAccum(filename=None,serialized=None):
         fl.close()
     else:
         ea = pickle.loads(serialized)
-    ea.reconstructPaths()
+    #ea.reconstructPaths()
     return ea
 
 
