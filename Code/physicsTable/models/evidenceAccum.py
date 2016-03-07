@@ -59,9 +59,12 @@ class EvidenceAccumulation(object):
 
     def resetEvidence(self):
         t = 0.
-        timepaths = []
+        self.obs = []
+        self.bounces = []
         while t < self.pm.maxtm:
-            timepaths.append(self.pm.getOutcomes(t,self.nsim))
+            o,bs = self.pm.getOutcomesAndBounces(t,self.nsim)
+            self.obs.append(o)
+            self.bounces.append(b)
             t += self.pm.pdist
         self.obs = timepaths
         self.ev = obs2Ev(self.obs,self.e1,self.e2)

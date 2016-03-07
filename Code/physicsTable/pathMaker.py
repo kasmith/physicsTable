@@ -133,7 +133,7 @@ class PathMaker(object):
         while r is None: r = tab.step(self.pdist)
         maxtm = tab.tm
         self.maxtm = maxtm
-        ntms = int(np.ceil(maxtm / self.pdist))
+        ntms = int(np.ceil(maxtm / self.pp201.dist))
         tms = [self.pdist*t for t in range(ntms)]
         def f(t): return(self.makePathSingTime(t,verbose))
         pths = async_map(f,tms,self.ncpu)
@@ -184,6 +184,11 @@ class PathMaker(object):
     def getSinglePath(self, time):
         pths = self.paths[str(time)]
         return random.choice(pths)
+
+    def getOutcomesAndBounces(self,time,n):
+        pths = self.paths[str(time)]
+        rs = random.sample(pths,n)
+        return [(r.o,r.b) for r in rs]
 
 def loadPathMaker(flnm):
     fl = open(flnm,'rU')
