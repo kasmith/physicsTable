@@ -133,7 +133,7 @@ class PathMaker(object):
         while r is None: r = tab.step(self.pdist)
         maxtm = tab.tm
         self.maxtm = maxtm
-        ntms = int(np.ceil(maxtm / self.pp201.dist))
+        ntms = int(np.ceil(maxtm / self.pdist))
         tms = [self.pdist*t for t in range(ntms)]
         def f(t): return(self.makePathSingTime(t,verbose))
         pths = async_map(f,tms,self.ncpu)
