@@ -62,7 +62,9 @@ class EvidenceAccumulation(object):
         self.obs = []
         self.bounces = []
         while t < self.pm.maxtm:
-            o,bs = self.pm.getOutcomesAndBounces(t,self.nsim)
+            oab = self.pm.getOutcomesAndBounces(t,self.nsim)
+            o = map(lambda x: x[0],oab)
+            b = map(lambda x: x[1][-1],oab)
             self.obs.append(o)
             self.bounces.append(b)
             t += self.pm.pdist
