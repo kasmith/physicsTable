@@ -115,7 +115,7 @@ class EvidenceAccumulation(object):
         self.twid = twid
         self.sm = MakeSmoother(maxn, toff / self.pdist, twid / self.pdist)
         op1 = SmoothFromPre(self.ptype1,self.sm)
-        op2 = SmoothFromPre(self,ptype2,self.sm)
+        op2 = SmoothFromPre(self.ptype2,self.sm)
         self.odec = [np.array([p1,p2,1.-p1-p2]) for p1,p2 in zip(op1,op2)]
 
     def setOffsetBySM(self,sm):
