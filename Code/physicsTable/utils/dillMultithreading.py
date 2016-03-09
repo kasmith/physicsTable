@@ -12,4 +12,7 @@ def apply_async(pool, fun, args):
 def async_map(fun,args,ncpu = cpu_count()):
     P = Pool(ncpu)
     jobs = [apply_async(P,fun, (a,) ) for a in args]
-    return [j.get() for j in jobs]
+    P.close()
+    r = [j.get() for j in jobs]
+    P.join()
+    return r
