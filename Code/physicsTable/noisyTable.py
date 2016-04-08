@@ -11,6 +11,7 @@ from __future__ import division
 
 import sys,os
 from simpleTable import *
+from basicTable import *
 import random
 import numpy as np
 import pymunk as pm
@@ -71,14 +72,77 @@ class NoisyTable(SimpleTable):
     def on_step(self):
         if self.balls is not None: self.jitter_ball(self.balls, self.kapm)
 
+class NoisyMultiTable(BasicTable):
+
+    def __init__(self, dims, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, *args, **kwds):
+
+                     self.kapv = kapv
+                     self.kapb = kapb
+                     self.kapm = kapm
+                     self.perr = perr
+                     super(NoisyMultiTable, self).__init__(dims, *args, **kwds)
+
+    def __del__(self):
+        super(NoisyMultiTable,self).__del__()
+
+    def jitter_ball(self, ball, kappa = None, posjitter = None):
+        if posjitter:
+            initpos = ball.getpos()
+            rad = ball.getrad()
+            xdim, ydim = self.dim
+            setting = True
+            while setting:
+                px = random.normalvariate(initpos[0],posjitter)
+                py = random.normalvariate(initpos[1],posjitter)
+                ball.setpos( (px, py) )
+                setting = False
+                # Check that the ball isn't outside the screen
+                if not (px > rad and py > rad and px < (xdim - rad) and py < (ydim - rad)):
+                    setting = True
+
+                # Check that the ball isn't stuck in walls or on a goal
+                brect = ball.getboundrect()
+                for w in self.walls:
+                    if brect.colliderect(w.r): setting = True
+                for g in self.goals:
+                    if brect.colliderect(g.r): setting = True
+
+
+        if kappa:
+            v = ball.getvel()
+            vang, vmag = velAngle(v[0], v[1])
+            newang = np.random.vonmises(vang, kappa)
+            ball.setvel( (vmag * np.cos(newang), vmag * np.sin(newang)) )
+
+    def on_wallhit(self, ball, wall):
+        self.jitter_ball(ball, self.kapb)
+
+    def on_ballhit(self, ballist):
+        for b in ballist: self.jitter_ball(b,self.kapb)
+
+    def on_addball(self, ball):
+        self.jitter_ball(ball,self.kapv, self.perr)
+
+    def on_step(self):
+        if self.balls is not None:
+            for b in self.balls: self.jitter_ball(b, self.kapm)
+
         
 def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS, straddlepaddle = True):
 
+    sttype = type(table) == SimpleTable
+
     try:
         import pygame
-        ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+        if sttype:
+            ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+        else:
+            ntab = NoisyMultiTable(table.dim, kapv, kapb, kapm, perr, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
     except:
-        ntab = NoisyTable(table.dim,kapv,kapb,kapm,perr,table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
+        if sttype:
+            ntab = NoisyTable(table.dim,kapv,kapb,kapm,perr,table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
+        else:
+            ntab = NoisyMultiTable(table.dim,kapv,kapb,kapm,perr,table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
     ntab.set_timestep(table.basicts)
     for w in table.walls: 
         if isinstance(w, AbnormWall): ntab.addAbnormWall(w.poly.get_vertices(), w.col, w.poly.elasticity)
@@ -106,9 +170,14 @@ def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = P
                 lr = (e2[0] + table.paddle.wid, e2[1])
         ntab.addGoal(ul, lr, paddlereturn, LIGHTGREY)
 
-    if table.balls: ntab.addBall(table.balls.getpos(), table.balls.getvel())
+    if sttype:
+        if table.balls: ntab.addBall(table.balls.getpos(), table.balls.getvel(),color = table.balls.col)
+    else:
+        for b in table.balls: ntab.addBall(b.getpos(),b.getvel(), color = b.col)
+
+    ntab.tm = table.tm
 
     return ntab
     
     
-    
+

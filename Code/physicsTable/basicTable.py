@@ -170,7 +170,7 @@ class BasicTable(object):
     def on_ballhit(self, balllist): pass
     def on_wallhit(self, ball, wall): pass
     def on_paddlehit(self, ball, paddle): pass
-    def on_goalhit(self, ball, paddle): pass
+    def on_goalhit(self, ball, goal): pass
     
     def activate(self): self.act = True
     def deactivate(self): self.act = False
@@ -291,7 +291,7 @@ class BasicTable(object):
         
     def step(self, t = 1/50., maxtime = None):
         substeps = t / self.basicts
-        if substeps != int(substeps): print "Warning: steps not evenly divisible - off by", (substeps - int(substeps))
+        if substeps != int(substeps): print "Warning: steps defnot evenly divisible - off by", (substeps - int(substeps))
         if self.act:
             for i in range(int(substeps)):
                 self.on_step()

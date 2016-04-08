@@ -7,7 +7,11 @@
 from ..basicTable import BasicTable
 from ..simpleTable import SimpleTable
 from ..constants import *
+from .pyText import screenPause
 import pygame as pg
+from pygame.constants import *
+import sys
+
 
 # Duck punching the BasicTable
 btabinit = BasicTable.__init__
@@ -126,13 +130,15 @@ def btdemonstrate(self, screen = None, timesteps = 1./50, retpath = False, oncli
     for event in pg.event.get(): pass # Flush queue
     stp = 0
     if retpath: rets = [[stp,self.balls.getpos()[0],self.balls.getpos()[1],self.balls.getvel()[0],self.balls.getvel()[1]]]
+    '''
     waiting = True
     while waiting:
         for event in pg.event.get():
             if event.type == QUIT: sys.exit(0)
             elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
             elif event.type == MOUSEBUTTONDOWN: waiting = False
-
+    '''
+    screenPause(0.)
     clk = pg.time.Clock()
     running = True
     while running:
@@ -157,13 +163,15 @@ def btdemonstrate(self, screen = None, timesteps = 1./50, retpath = False, oncli
     #if self.mostlyOcc(): return False
     self.draw()
     pg.display.flip()
-
+    '''
     waiting = waitafter
     while waiting:
         for event in pg.event.get():
             if event.type == QUIT: sys.exit(0)
             elif event.type == KEYDOWN and event.key == K_ESCAPE: sys.exit(0)
             elif event.type == MOUSEBUTTONDOWN: waiting = False
+    '''
+    if waitafter: screenPause(0.)
 
     #if retpath: return [self.tm, rets]
     return self.tm
