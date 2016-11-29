@@ -15,7 +15,7 @@ except:
 from rgcreator import RGCreator
 
 def startRGCreator(tbsize = (900,900), flnm = None):
-    cr = creator.RGCreator(tbsize)
+    cr = RGCreator(tbsize)
     if flnm is not None:
         isgood = cr.load(flnm)
         if not isgood:
