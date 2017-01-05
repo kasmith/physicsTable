@@ -738,6 +738,7 @@ class RGCreator(object):
             else: warnings.warn( "Abnormal walls (polygons) not supported yet and will not be loaded" )
         self.changed = False
         self.deffl = trpath
+        self.selectedobj = None
         
         return True
         
