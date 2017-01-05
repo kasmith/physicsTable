@@ -1,13 +1,34 @@
 from warnings import warn
 
 
-__all__ = ['displayInstructions','mousePos','FONT_L','FONT_M','FONT_S','FONT_VL', 'screenPause',
-           'WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE',
+__all__ = ['screenPause', 'WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE',
            'Ball','Wall','Occlusion','AbnormWall','Goal','Paddle','ptRect','BasicTable','SimpleTable']
 
 try:
     import pygame as pg
-    from pyText import displayInstructions, mousePos, FONT_L, FONT_M, FONT_S, FONT_VL, screenPause
+    from pygame.locals import *
+
+    def quitevent(quit_k=[K_LSHIFT, K_ESCAPE]):
+        keys = pg.key.get_pressed()
+        for k in quit_k:
+            if keys[k] == 0:
+                return False
+        return True
+
+
+    def screenPause(t=0.5, keymove=True, clickmove=True):
+        time.sleep(t)
+        for e in pg.event.get(): pass
+        while True:
+            for e in pg.event.get():
+                if e.type == QUIT:
+                    return True
+                elif e.type == KEYDOWN:
+                    if keymove and (e.key != K_ESCAPE and e.key != K_LSHIFT): return False
+                    if quitevent(): return True
+                elif e.type == MOUSEBUTTONDOWN and clickmove:
+                    return False
+
     from vizobjects import Ball, Wall, Occlusion, AbnormWall, Goal, Paddle, ptRect
     from viztables import BasicTable, SimpleTable
 except:

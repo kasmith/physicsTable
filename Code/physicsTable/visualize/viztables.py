@@ -7,7 +7,7 @@
 from ..basicTable import BasicTable
 from ..simpleTable import SimpleTable
 from ..constants import *
-from .pyText import screenPause
+from .__init__ import screenPause
 import pygame as pg
 from pygame.constants import *
 import sys
