@@ -1,4 +1,5 @@
 from warnings import warn
+import time
 
 
 __all__ = ['screenPause', 'WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE',

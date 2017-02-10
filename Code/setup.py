@@ -16,14 +16,14 @@ class wx_smart_install_data(distutils.command.install_data.install_data):
 
 
 setup(name = 'PhysicsTable',
-      version = '0.41',
+      version = '0.5',
       description = '2-D physics tables for intuitive physics psychology experiments',
       author = 'Kevin A Smith',
       author_email = 'k2smith@mit.edu',
       url = 'https://github.com/kasmith/physicsTable',
       packages = ['physicsTable','physicsTable.objects','physicsTable.utils','physicsTable.constants','physicsTable.creator',
                   'physicsTable.visualize','physicsTable.models'],
-      requires = ['pymunk','numpy','scipy'],
+      requires = ['pymunk (>=5.0)','numpy','scipy'],
       data_files=[('physicsTable/creator/Icons',icons)],
       cmdclass = {'install_data': wx_smart_install_data }
       )

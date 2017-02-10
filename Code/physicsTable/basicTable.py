@@ -25,13 +25,16 @@ from weakref import ref
 
 
 # Helper functions
-def coll_func_ball_ball(space, arbiter, tableref):
+def coll_func_ball_ball(arbiter, space, data):
+    tableref = data['tableref']
     if tableref() is not None: tableref().coll_ball_ball(arbiter)
         
-def coll_func_ball_wall(space, arbiter, tableref):
+def coll_func_ball_wall(arbiter, space, data):
+    tableref = data['tableref']
     if tableref() is not None: tableref().coll_ball_wall(arbiter)
     
-def coll_func_ball_pad(space, arbiter, tableref):
+def coll_func_ball_pad(arbiter, space, data):
+    tableref = data['tableref']
     if tableref() is not None: tableref().coll_ball_pad(arbiter)
 
 def euclid_dist(p1, p2, maxdist = None):
@@ -93,9 +96,18 @@ class BasicTable(object):
         sys.stdout = _stdout
         self.sp.gravity = pm.Vec2d(0.,0.)
         stb = self.sp.static_body
-        self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_BALL, None, None, None, coll_func_ball_ball, tableref = ref(self))
-        self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_WALL, None, None,None, coll_func_ball_wall, tableref = ref(self))
-        self.sp.add_collision_handler(COLLTYPE_BALL,COLLTYPE_PAD,None, None,None, coll_func_ball_pad, tableref = ref(self))
+
+        bbch = self.sp.add_collision_handler(COLLTYPE_BALL, COLLTYPE_BALL)
+        bbch.data['tableref'] = ref(self)
+        bbch.separate = coll_func_ball_ball
+
+        bwch = self.sp.add_collision_handler(COLLTYPE_BALL, COLLTYPE_WALL)
+        bwch.data['tableref'] = ref(self)
+        bwch.separate = coll_func_ball_wall
+
+        bpch = self.sp.add_collision_handler(COLLTYPE_BALL, COLLTYPE_PAD)
+        bpch.data['tableref'] = ref(self)
+        bpch.separate = coll_func_ball_pad
 
         # Empty color info that gets replaced if pygame is there
         self.bk_c = None
@@ -119,11 +131,25 @@ class BasicTable(object):
 
         
         self.top = self.bottom = self.right = self.left = None
+        def makeBoundingBoxShape(left, top, right, bottom):
+            verts = [(left,top),(left,bottom),(right,bottom),(right,top)]
+            s = pm.Poly(stb, verts)
+            s.elasticity = 1.
+            s.collision_type = COLLTYPE_WALL
+            return s
         for ce in closed_ends:
-            if ce == TOP: s = pm.Segment(stb, (-1,-10), (self.dim[0]+1,-10),10); s.elasticity = 1.; self.sp.add(s); s.collision_type = COLLTYPE_WALL; self.top = s
-            elif ce == BOTTOM: s = pm.Segment(stb, (-1,self.dim[1]+10), (self.dim[0]+1,self.dim[1]+10),10); s.elasticity = 1.; self.sp.add(s); s.collision_type = COLLTYPE_WALL; self.bottom = s
-            elif ce == RIGHT: s = pm.Segment(stb, (self.dim[0]+10,-1), (self.dim[0]+10,self.dim[1]+1),10); s.elasticity = 1.; self.sp.add(s); s.collision_type = COLLTYPE_WALL; self.right = s
-            elif ce == LEFT: s = pm.Segment(stb, (-10,-1), (-10,self.dim[1]+1),10); s.elasticity = 1.; self.sp.add(s); s.collision_type = COLLTYPE_WALL; self.left = s
+            if ce == TOP:
+                self.top = makeBoundingBoxShape(-1, -10, self.dim[0]+1, 0)
+                self.sp.add(self.top)
+            elif ce == BOTTOM:
+                self.bottom = makeBoundingBoxShape(-1,self.dim[1],self.dim[0]+1,self.dim[1]+10)
+                self.sp.add(self.bottom)
+            elif ce == RIGHT:
+                self.right = makeBoundingBoxShape(-10, -1, 0, self.dim[1])
+                self.sp.add(self.right)
+            elif ce == LEFT:
+                self.left = makeBoundingBoxShape(self.dim[0], -1, self.dim[0]+10, self.dim[1]+1)
+                self.sp.add(self.left)
             else: print "Warning: Inappropriate closed_ends:", ce
             
         # Other characteristics
