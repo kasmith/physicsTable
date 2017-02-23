@@ -52,6 +52,28 @@ if __name__ == '__main__':
         table.addOcc((100,50),(600,150))
         table.addGoal((0,300),(100,400),SUCCESS, RED)
         print table.demonstrate(timesteps = 1/200.)
+        
+        
+    elif args[1] == 'GRAVITY':
+        xlim = 2000
+        screen = pg.display.set_mode((xlim,500))
+        running = True
+        while running:
+            spin = -20*random.random()
+            table = GravityTable((xlim,500))
+            table.addBall((100,100),(200,0),spin, rad = 30, elast = 1.)
+            table.addPaddle(0,500,xlim - 500,xlim)
+            table.addGoal((-100000,501),(2000,1000),FAILURE)
+            table.addGoal((-1000,-100),(-1,600),FAILURE)
+            table.addGoal((xlim+1,-100),(xlim+1000,600),FAILURE)
+            table.demonstrate()
+            wait = True
+            while wait:
+                for e in pg.event.get():
+                    if e.type == MOUSEBUTTONDOWN: wait = False
+                    elif e.type == QUIT: running = False
+                    elif e.type == KEYDOWN and e.key == K_ESCAPE: running = False
+                    
     elif args[1] == 'NOISY':
         screen = pg.display.set_mode((1000,600))
         clock = pg.time.Clock()
@@ -128,25 +150,3 @@ if __name__ == '__main__':
 
     pg.quit()
     sys.exit(0)
-
-'''
-elif args[1] == 'GRAVITY':
-    xlim = 2000
-    screen = pg.display.set_mode((xlim,500))
-    running = True
-    while running:
-        spin = -20*random.random()
-        table = GravityTable((xlim,500))
-        table.addBall((100,100),(200,0),spin, rad = 30, elast = 1.)
-        table.addPaddle(0,500,xlim - 500,xlim)
-        table.addGoal((-100000,501),(2000,1000),FAILURE)
-        table.addGoal((-1000,-100),(-1,600),FAILURE)
-        table.addGoal((xlim+1,-100),(xlim+1000,600),FAILURE)
-        table.demonstrate()
-        wait = True
-        while wait:
-            for e in pg.event.get():
-                if e.type == MOUSEBUTTONDOWN: wait = False
-                elif e.type == QUIT: running = False
-                elif e.type == KEYDOWN and e.key == K_ESCAPE: running = False
-'''
