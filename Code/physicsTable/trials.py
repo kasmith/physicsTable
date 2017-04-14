@@ -9,7 +9,6 @@ import json
 
 
 def safeListify(tolist):
-
     if hasattr(tolist, '__iter__') or type(tolist).__name__ == 'Color':
         return [safeListify(l) for l in tolist]
     else:
@@ -240,6 +239,34 @@ class SimpleTrial(object):
         ofl = open(flnm,'w')
         ofl.write(jfl)
         ofl.close()
+
+def loadTrialFromJSON(jsonfl, trialType = 'basic'):
+    trialType = trialType.lower()
+    assert trialType in ['basic','redgreen','pong'], "Invalid trial type"
+    if trialType == 'basic':
+        TrClass = SimpleTrial
+    elif trialType == 'redgreen':
+        TrClass = RedGreenTrial
+    elif trialType == 'pong':
+        TrClass = PongTrial
+    with open(jsonfl,'rU') as jfl:
+        j = json.load(jfl)
+        tr = TrClass(j['Name'], j['Dims'], j['ClosedEnds'], background_cl=j['BKColor'])
+        b = j['Ball']
+        if b:
+            tr.addBall(b[0],b[1],b[2],b[3],b[4])
+        for w in j['Walls']:
+            tr.addWall(w[0],w[1],w[2],w[3])
+        for o in j['Occluders']:
+            tr.addOcc(o[0],o[1],o[2])
+        for g in j['Goals']:
+            tr.addGoal(g[0],g[1],g[2],g[3])
+        for a in j['AbnormWalls']:
+            tr.addAbnormWall(a[0],a[1],a[2])
+        p = j['Paddle']
+        if p:
+            tr.addPaddle(j[0],j[1],j[2],j[3],j[4],j[5],j[6],j[7],j[8])
+    return tr
 
 class PongTrial(SimpleTrial):
     
