@@ -4,15 +4,15 @@ import os, sys, time, copy, bisect, random
 from ..noisyTable import *
 from ..trials import *
 from ..utils import *
+from ..constants import UNCERTAIN
 from ..pathMaker import Path, PathMaker, loadPathMaker, makeFileName
 from scipy.stats import norm
 import numpy as np
-from multiprocessing import cpu_count
 
 def selectReplace(items, weights, n):
     if len(items) != len(weights): raise(Exception("Needs equal number of items, weights"))
     cumw = [sum(weights[:(x+1)]) for x in range(len(weights))]
-    return [items[bisect.bisect(cumw,random.random()*max(cumw))] for x in range(n)] 
+    return [items[bisect.bisect(cumw,random.random()*max(cumw))] for _ in range(n)]
 
 
 class pfPath(object):
@@ -22,7 +22,7 @@ class pfPath(object):
 
     # Get the probability of observing the ball given the current path
     #  Can somewhat account for occlusion
-    def getP(self, t, ballpos,ballrad, errsd, iscovered = False,walls = [], occluders = []):
+    def getP(self, t, ballpos, ballrad, errsd, iscovered = False,walls = [], occluders = []):
         p = self.path
         pos = p.getpos(t)
         if not iscovered:
@@ -31,7 +31,8 @@ class pfPath(object):
         else:
             # If the particle is in the goal while the ball is covered, it shouldn't be
             idx = int((t - p.inittime) / self.tps)
-            if idx > len(p.path): return 1e-100
+            if idx > len(p.path):
+                return 1e-100
 
             # If the ball is covered, the particle should test vs probability that it should be covered
             covmat = np.array([[errsd,0],[0,errsd]])
@@ -66,34 +67,39 @@ class pfPath(object):
             else:
                 return pth
 
+    # Get the current position of the ball on the path
+    def getPos(self, t):
+        return self.path.getpos(t)
+
+    def getOutcome(self):
+        return self.path.o
+
+    def getBounces(self):
+        return self.path.b
+
+    outcome = property(getOutcome)
+    bounces = property(getBounces)
+
+
 
 class PathFilter(object):
     def __init__(self,trial,**args):
         argnms = args.keys()
 
         trnm = trial.name
+        # Set required trial info
+        self.brad = trial.ball[2]
 
         # Set simulation parameters
-        if 'kapv' in argnms: kapv = args['kapv']
-        else: kapv = KAPV_DEF
-        if 'kapb' in argnms: kapb = args['kapb']
-        else: kapb = KAPB_DEF
-        if 'kapm' in argnms: kapm = args['kapm']
-        else: kapm = KAPM_DEF
-        if 'perr' in argnms: perr = args['perr']
-        else: perr = PERR_DEF
-
-        if 'nsims' in argnms: nsims = args['nsims']
-        else: nsims = 200
-
-        if 'timeperstep' in argnms: tps = args['timeperstep']
-        else: tps = 0.1
-        if 'simtimeres' in argnms: tres = args['simtimeres']
-        else: tres = .05
-        if 'timelim' in argnms: tlim = args['timelim']
-        else: tlim = 60.
-        if 'ncpu' in argnms: ncpu = args['ncpu']
-        else: ncpu = max(cpu_count() - 1,1)
+        kapv = args.get('kapv',KAPV_DEF)
+        kapb = args.get('kapb',KAPB_DEF)
+        kapm = args.get('kapm',KAPM_DEF)
+        perr = args.get('perr',PERR_DEF)
+        nsims = args.get('nsims',200)
+        tps = args.get('timeperstep',0.1)
+        tres = args.get('simtimeres',0.05)
+        tlim = args.get('timelim',60.)
+        ncpu = args.get('ncpu', 1)
 
         # Either load the existing PathMaker or make a new one
         if 'flnm' in argnms:
@@ -115,16 +121,12 @@ class PathFilter(object):
             self.pm.save(flnm)
 
         # Load the decision parameters
-        if 'newpct' in argnms: self.newpct = args['newpct']
-        else: self.newpct = 10e-7
-        if 'temp' in argnms: self.temp = args['temp']
-        else: self.temp = .2
-        if 'min_sure' in argnms: self.sure = args['min_sure']
-        else: self.sure = .99
-        if 'endconds' in argnms: self.endconds = args['endconds']
-        else: self.endconds = None
-        if 'npaths' in argnms: self.npart = args['npaths']
-        else: self.npart = 10
+        self.newpct = args.get('newpct', 10e-7)
+        self.obserr = args.get('obserr', perr)
+        self.temp = args.get('temp', 0.2)
+        self.sure = args.get('min_sure', 0.99)
+        self.endconds = args.get('endconds', None)
+        self.npart = args.get('npaths', 10)
 
         self.tr = trial
         self.table = self.tr.makeTable()
@@ -144,13 +146,95 @@ class PathFilter(object):
         self.tres = tres
         self.tlim = 60.
 
-        self.paths = [lambda x: samplePath(0.) for i in range(self.npart)]
-        self.weights = [1/self.npart for i in range(self.npart)]
+        self.paths = [self.samplePath(0.) for _ in range(self.npart)]
+        self.weights = np.array([1/self.npart for _ in range(self.npart)])
 
     def samplePath(self,t): return pfPath(self.pm.getSinglePath(t))
 
+    def getNPaths(self):
+        return len(self.paths)
 
+    # Goes back to the beginning for another round
+    def reset(self):
+        self.table = self.tr.makeTable()
+        self.t = 0.
+        self.paths = [self.samplePath(0.) for _ in range(self.npart)]
+        self.weights = np.array([1 / self.npart for _ in range(self.npart)])
 
+    # Steps the world forward, updates the path filter
+    def step(self, stepsize = None):
+        if stepsize is None:
+            stepsize = self.tps
+
+        # 1) Step the world forward and calculate the new ball position
+        r = self.table.step(stepsize)
+        self.t += stepsize
+        bpos = self.table.balls.getpos()
+
+        # 2) Calculate the particle probabilities
+        part_ps = self.getPartPs(bpos, self.t, self.table.fullyOcc())
+
+        # 3) Resample paths based on probabilities (plus regen)
+        self.resamplePaths(part_ps)
+
+        # 4) Calculate the total weight attributed to each decision and test if enough
+        dec = self.getDecision()
+
+        return r, dec
+
+    # Runs a single path
+    def runPath(self):
+        self.reset()
+        decs = []
+        while True:
+            r, dec = self.step()
+            decs.append(dec)
+            if r is not None:
+                return decs
+
+    # Get a vector of probabilities of the particles for a given ball position
+    def getPartPs(self, ballpos, t, occluded = False):
+        return np.array([p.getP(t, ballpos, self.brad, self.obserr, occluded, self.table.walls, self.table.occludes) \
+                for p in self.paths])
+
+    # Given a set of path probabilities, reweight, and regenerate if needed
+    def resamplePaths(self, probs):
+        pidxs = range(len(self.paths)) + [-1]
+        pwts = list(np.power(probs * self.weights, self.temp)) + [self.newpct]
+        pwts = [w/(sum(pwts)) for w in pwts]
+        newidxs = selectReplace(pidxs, pwts, self.npart)
+        newidxs.sort()
+        nextparts = []
+        nextweights = []
+        lastidx = -1
+        for i in newidxs:
+            if i == -1:
+                nextparts.append(self.samplePath(self.t))
+                nextweights.append(1. / self.npart)
+            else:
+                if i == lastidx:
+                    nextweights[-1] += 1. / self.npart
+                else:
+                    nextparts.append(self.paths[i])
+                    nextweights.append(1. / self.npart)
+                    lastidx = i
+        self.paths = nextparts
+        self.weights = np.array(nextweights)
+
+    # Counts up path weights and determines whether it is enough to make a decision
+    def getDecision(self):
+        ocomes = [p.outcome for p in self.paths]
+        odict = {}
+        for o,w in zip(ocomes, self.weights):
+            if o not in odict:
+                odict[o] = 0.
+            odict[o] += w
+        for o,w in odict.items():
+            if w >= self.sure:
+                return o
+        return UNCERTAIN
+
+'''
 class PathFilter(object):
     
     def __init__(self, table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, nparticles = 5, newpct = 10e-7, temp = .2, timelim = 10., timeperstep = .05, min_sure = .99, endconds = None):
@@ -211,7 +295,7 @@ class PathFilter(object):
         
         weights = [p.weight for p in self.particles]
         ps = self.getPartPs()
-        newws = [2*p for w,p in zip(weights,ps)]
+        newws = [w*p for w,p in zip(weights,ps)]
         newws.append(self.newp)
         newws = map(lambda x: np.power(x, self.temp), newws)
         totw = sum(newws)
@@ -227,7 +311,7 @@ class PathFilter(object):
         self.particles = newps
         return r
 
-    ''' MOVE TO VISUALIZATION
+    # MOVE TO VISUALIZATION
     def draw(self, drawlines = False):
         sc = self.table.draw()
         for part, p in zip(self.particles, self.getPartPs()):

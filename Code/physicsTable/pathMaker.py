@@ -48,12 +48,13 @@ def loadPaths(trial,kapv,kapb,kapm,perr,nsims=200,path = '.',verbose=False):
     return pm
 
 class Path(object):
-    def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True,verbose = False):
+    def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True,verbose = False, allow_timeout=False):
         ntab = makeNoisy(tab,kv,kb,km,pe)
         nbads = 0
         self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         # Make sure that we get a valid goal
-        while (self.o is TIMEUP or self.o is OUTOFBOUNDS or ntab.balls.bounces > 255) and enforcegoal:
+        while ((self.o is TIMEUP and not allow_timeout) or self.o is OUTOFBOUNDS or \
+                           ntab.balls.bounces > 255) and enforcegoal:
             del ntab
             ntab = makeNoisy(tab,kv,kb,km,pe)
             nbads += 1
@@ -102,15 +103,20 @@ class Path(object):
         self.compb = None
 
     def getpos(self,t):
-        if self.p is None: self.decompress()
-        if t > self.tl: return None
+        if self.p is None:
+            self.decompress()
+        if t > self.tl:
+            return None
         i = int(t/self.ts)
+        if i >= len(self.p):
+            return self.p[-1]
         return self.p[i]
 
 
 class PathMaker(object):
 
-    def __init__(self,trial, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, npaths = 100, pathdist = .1, timelen = 60., timeres = 0.05, cpus = cpu_count(),verbose = False):
+    def __init__(self,trial, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, npaths = 100, \
+                 pathdist = .1, timelen = 60., timeres = 0.05, cpus = cpu_count(),verbose = False, allow_timeout=False):
         self.trial = trial
         self.npaths = npaths
         self.kv = kapv
@@ -121,6 +127,8 @@ class PathMaker(object):
         self.res = timeres
         self.pdist = pathdist
         self.ncpu = cpus
+        self.compressed = False
+        self.timeout = allow_timeout
 
         self.makePaths(verbose)
 
@@ -146,47 +154,57 @@ class PathMaker(object):
         tab = self.trial.makeTable()
         while tab.tm < t:
             tab.step(self.pdist)
-        return map(lambda x: Path(tab,self.kv,self.kb,self.km,self.pe,self.time,self.res,verbose=verbose),range(self.npaths))
+        return map(lambda x: Path(tab,self.kv,self.kb,self.km,self.pe,self.time,self.res,verbose=verbose,\
+                                  allow_timeout=self.timeout), range(self.npaths))
 
     def compressPaths(self):
-        for k in self.paths.keys():
-            for p in self.paths[k]:
-                p.compress()
+        if not self.compressed:
+            for k in self.paths.keys():
+                for p in self.paths[k]:
+                    p.compress()
+            self.compressed = True
+        else:
+            print "Paths already compresseed"
 
     def decompressPaths(self):
-        for k in self.paths.keys():
-            for p in self.paths[k]:
-                p.decompress()
+        if self.compressed:
+            for k in self.paths.keys():
+                for p in self.paths[k]:
+                    p.decompress()
+            self.compressed = False
+        else:
+            print "Paths already decompressed"
 
-    def save(self,flnm):
+    def save(self, flnm, docompress=True):
         cp = copy.deepcopy(self)
-        cp.compressPaths()
+        if docompress:
+            cp.compressPaths()
         fl = open(flnm,'w')
         pickle.dump(cp,fl,protocol=2)
         fl.close()
 
     # Simple way of pulling out a few outcomes and/or paths
     def getOutcomes(self,time,n):
-        pths = self.paths[str(time)]
+        pths = self.paths[str(float(time))]
         rs = random.sample(pths,n)
         return [r.o for r in rs]
 
     def getPaths(self,time,n):
-        pths = self.paths[str(time)]
+        pths = self.paths[str(float(time))]
         rs = random.sample(pths,n)
         return [r.p for r in rs]
 
     def getPathsAndOutcomes(self,time,n):
-        pths = self.paths[str(time)]
+        pths = self.paths[str(float(time))]
         rs = random.sample(pths,n)
         return [(r.o,r.p) for r in rs]
 
     def getSinglePath(self, time):
-        pths = self.paths[str(time)]
+        pths = self.paths[str(float(time))]
         return random.choice(pths)
 
     def getOutcomesAndBounces(self,time,n):
-        pths = self.paths[str(time)]
+        pths = self.paths[str(float(time))]
         rs = random.sample(pths,n)
         return [(r.o,r.b) for r in rs]
 
@@ -194,5 +212,6 @@ def loadPathMaker(flnm):
     fl = open(flnm,'rU')
     pm = pickle.load(fl)
     fl.close()
-    pm.decompressPaths()
+    if pm.compressed:
+        pm.decompressPaths()
     return pm
