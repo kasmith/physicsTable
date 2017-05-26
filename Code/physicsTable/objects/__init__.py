@@ -222,8 +222,7 @@ class Paddle(object):
         self.pos = min(max(np,self.lwrbound),self.uprbound)
         if self.act:
             pts = self.getendpts()
-            self.seg.unsafe_set_a(pts[0])
-            self.seg.unsafe_set_b(pts[1])
+            self.seg.unsafe_set_endpoints(pts[0],pts[1])
             self.seg.cache_bb()
         
     def getendpts(self):
