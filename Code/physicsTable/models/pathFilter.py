@@ -22,7 +22,7 @@ class pfPath(object):
 
     # Get the probability of observing the ball given the current path
     #  Can somewhat account for occlusion
-    def getP(self, t, ballpos, ballrad, errsd, iscovered = False,walls = [], occluders = []):
+    def getP(self, t, ballpos, ballrad, errsd, iscovered = False, walls = [], occluders = []):
         p = self.path
         pos = p.getpos(t)
         if not iscovered:
@@ -109,7 +109,13 @@ class PathFilter(object):
             flnm = makeFileName(trnm,kapv,kapb,kapm,perr,nsims,'.')
             hasnm = False
 
-        if os.path.exists(flnm) and hasnm:
+        if 'pathmaker' in argnms:
+            self.pm = args['pathmaker']
+            kapv = self.pm.kv
+            kapb = self.pm.kb
+            kapm = self.pm.km
+            perr = self.pm.pe
+        elif os.path.exists(flnm) and hasnm:
             self.pm = loadPathMaker(flnm)
             kapv = self.pm.kv
             kapb = self.pm.kb
@@ -117,7 +123,7 @@ class PathFilter(object):
             perr = self.pm.pe
         else:
             print 'No PathMaker object exists... creating now - please be patient!'
-            self.pm = PathMaker(trial,kapv,kapb,kapm,perr,nsims,tps,tlim,tres,cpus)
+            self.pm = PathMaker(trial,kapv,kapb,kapm,perr,nsims,tps,tlim,tres,ncpu)
             self.pm.save(flnm)
 
         # Load the decision parameters
@@ -133,7 +139,7 @@ class PathFilter(object):
         # Temporary kludge... can't use wonky walls with occluders
         for w in self.table.walls:
              if w.shapetype != SHAPE_RECT:
-                 if len(table.occludes) > 0: raise Exception('Path filters require walls to be rectangular or no occlusions - do not use AbnormWalls')
+                 if len(self.table.occludes) > 0: raise Exception('Path filters require walls to be rectangular or no occlusions - do not use AbnormWalls')
 
         self.kv = kapv
         self.kb = kapb

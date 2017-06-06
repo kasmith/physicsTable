@@ -1,5 +1,5 @@
-__all__ = ['Path','PathFilter','PointSimulation','EvidenceAccumulation','loadEvidenceAccum']
+__all__ = ['PathFilter','PointSimulation','EvidenceAccumulation','loadEvidenceAccum']
 
-from pathFilter import Path, PathFilter
+from pathFilter2 import pfPath, PathFilter
 from pointSimulation import PointSimulation
 from evidenceAccum import EvidenceAccumulation, loadEvidenceAccum
