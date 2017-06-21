@@ -105,9 +105,10 @@ class Path(object):
     def getpos(self,t):
         if self.p is None:
             self.decompress()
-        if t > self.tl:
+        used_t = t - self.initt
+        if used_t > self.tl:
             return None
-        i = int(t/self.ts)
+        i = int(used_t/self.ts)
         if i >= len(self.p):
             return self.p[-1]
         return self.p[i]

@@ -155,7 +155,8 @@ class PathFilter(object):
         self._make_obs()
         self.reset()
 
-    def sample_path(self,t): return pfPath(self._pm.getSinglePath(t))
+    def sample_path(self,t):
+        return pfPath(self._pm.getSinglePath(t))
 
     def get_n_paths(self):
         return len(self._paths)
@@ -244,13 +245,85 @@ class PathFilter(object):
 
     # Counts up path weights and determines whether it is enough to make a decision
     def get_decision(self):
-        ocomes = [p.outcome for p in self._paths]
-        odict = {}
-        for o,w in zip(ocomes, self._weights):
-            if o not in odict:
-                odict[o] = 0.
-            odict[o] += w
+        odict = self.get_outcome_beliefs()
         for o,w in odict.items():
             if w >= self._sure:
                 return o
         return UNCERTAIN
+
+    def get_outcome_beliefs(self):
+        ocomes = [p.outcome for p in self._paths]
+        odict = {}
+        for o, w in zip(ocomes, self._weights):
+            if o not in odict:
+                odict[o] = 0.
+            odict[o] += w
+        return odict
+
+# Like the path filter, but makes its own samples rather than drawing from a pathmaker
+# Because of this, needs to be reset after each run
+class PathFilterRaw(PathFilter):
+
+    def __init__(self,trial,**args):
+        argnms = args.keys()
+
+        trnm = trial.name
+        # Set required trial info
+        self._brad = trial.ball[2]
+
+        # Set simulation parameters
+        kapv = args.get('kapv',KAPV_DEF)
+        kapb = args.get('kapb',KAPB_DEF)
+        kapm = args.get('kapm',KAPM_DEF)
+        perr = args.get('perr',PERR_DEF)
+        nsims = args.get('nsims',200)
+        tps = args.get('timeperstep',0.1)
+        tres = args.get('simtimeres',0.05)
+        tlim = args.get('timelim',60.)
+
+        # Load the decision parameters
+        self._newpct = args.get('newpct', 10e-7)
+        self._obserr = args.get('obserr', perr)
+        self._temp = args.get('temp', 0.2)
+        self._sure = args.get('min_sure', 0.99)
+        self._endconds = args.get('endconds', None)
+        self._npath = args.get('npaths', 10)
+
+        self._tr = trial
+        self._table = self._tr.makeTable()
+        # Temporary kludge... can't use wonky walls with occluders
+        for w in self._table.walls:
+             if w.shapetype != SHAPE_RECT:
+                 if len(self._table.occludes) > 0: raise Exception('Path filters require walls to be rectangular or no occlusions - do not use AbnormWalls')
+
+        self._kv = kapv
+        self._kb = kapb
+        self._km = kapm
+        self._pe = perr
+        self._t = 0.
+
+        self._tps = tps
+        self._tres = tres
+        self._tlim = 60.
+
+        self._make_obs()
+        self.reset()
+
+    def step(self):
+        # 1) Get the ball position at the new time - end if the ball has hit the end
+        self._t += self._tps
+        r = self._table.step(self._tps)
+        if r:
+            return r, self.get_decision()
+        bpos = self._table.balls.getpos()
+
+        # 2) Calculate the particle probabilities
+        part_ps = self.get_part_ps(bpos, self._t, self._occludes[self._t])
+
+        # 3) Resample paths based on probabilities (plus regen)
+        self.resample_paths(part_ps)
+
+        # 4) Calculate the total weight attributed to each decision and test if enough
+        dec = self.get_decision()
+
+        return None, dec

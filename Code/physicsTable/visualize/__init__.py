@@ -3,7 +3,7 @@ import time
 
 
 __all__ = ['screenPause', 'WHITE','BLACK','BLUE','RED','GREEN','GREY','LIGHTGREY','YELLOW','GOLD','PURPLE',
-           'Ball','Wall','Occlusion','AbnormWall','Goal','Paddle','ptRect','BasicTable','SimpleTable']
+           'Ball','Wall','Occlusion','AbnormWall','Goal','Paddle','ptRect','BasicTable','SimpleTable',"pgFig"]
 
 try:
     import pygame as pg

@@ -14,8 +14,8 @@ class pgFig(object):
 
     # Various plots
     def plot(self,*args,**kwds): self.ax.plot(*args,**kwds)
-    def bar(self,*args,**kwds): self.ax.bar(*args,**kwds)
-    def barh(self,*args,**kwds): self.ax.barh(*args,**kwds)
+    def bar(self,*args,**kwds): return self.ax.bar(*args,**kwds)
+    def barh(self,*args,**kwds): return self.ax.barh(*args,**kwds)
     def boxplot(self,*args,**kwds): self.ax.boxplot(*args,**kwds)
     def broken_barh(self,*args,**kwds): self.ax.broken_barh(*args,**kwds)
     def bxp(self,*args,**kwds): self.ax.bxp(*args,**kwds)
@@ -89,3 +89,7 @@ class pgFig(object):
     def minorticks_off(self): self.ax.minorticks_off()
     def minorticks_on(self): self.ax.minorticks_on()
     def set(self,**kwds): self.ax.set(**kwds)
+
+    # Makes sure to close down the window
+    def __del__(self):
+        pylab.close(self.fig)
