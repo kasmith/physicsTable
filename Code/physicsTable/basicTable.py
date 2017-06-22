@@ -317,7 +317,10 @@ class BasicTable(object):
         
     def step(self, t = 1/50., maxtime = None):
         substeps = t / self.basicts
-        if substeps != int(substeps): print "Warning: steps defnot evenly divisible - off by", (substeps - int(substeps))
+        # Check for offsets in substeps, tolerant to rounding errors
+        isubs = int(np.floor(substeps + 1e-7))
+        if abs(substeps - isubs) > 1e-6:
+            print "Warning: steps not evenly divisible - off by", (substeps - isubs)
         if self.act:
             for i in range(int(substeps)):
                 self.on_step()

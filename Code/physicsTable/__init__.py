@@ -10,12 +10,13 @@ from warnings import warn
 __all__ = ['objects','SimpleTable','BasicTable','NoisyTable',
            'SimpleTrial','PongTrial','PathMaker','loadPathMaker',
            'RedGreenTrial','loadTrial','constants','makeNoisy',
-           'utils','models','loadTrialFromJSON', 'loadJSON']
+           'utils','models','loadTrialFromJSON', 'loadJSON',
+           'PseudoPathMaker']
 
 from basicTable import BasicTable
 from simpleTable import SimpleTable
 from noisyTable import NoisyTable, makeNoisy
-from pathMaker import PathMaker, loadPathMaker
+from pathMaker import PathMaker, loadPathMaker, PseudoPathMaker
 from trials import SimpleTrial, PongTrial, RedGreenTrial, loadTrial, \
     loadTrialFromJSON, loadJSON
 

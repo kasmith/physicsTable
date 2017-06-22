@@ -11,6 +11,7 @@ from ..objects import *
 from .__init__ import screenPause
 import pygame as pg
 from pygame.constants import *
+import numpy as np
 import sys
 
 
@@ -75,7 +76,10 @@ BasicTable.draw = btdraw
 
 def btstep(self, t = 1/50., maxtime = None):
     substeps = t / self.basicts
-    if substeps != int(substeps): print "Warning: steps not evenly divisible - off by", (substeps - int(substeps))
+    # Check for offsets in substeps, tolerant to rounding errors
+    isubs = int(np.floor(substeps + 1e-7))
+    if abs(substeps - isubs) > 1e-6:
+        print "Warning: steps not evenly divisible - off by", (substeps - isubs)
     if self.paddle and pg.mouse.get_focused():
         self.paddle.update(self.getRelativeMousePos())
         #print any([sh == self.paddle.seg for sh in self.sp.shapes])

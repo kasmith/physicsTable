@@ -209,6 +209,13 @@ class PathMaker(object):
         rs = random.sample(pths,n)
         return [(r.o,r.b) for r in rs]
 
+    # Get maximum time allowable
+    def _get_max_time(self):
+        allts = map(float(self.paths.keys()))
+        return max(allts)
+
+    max_time = property(_get_max_time)
+
 def loadPathMaker(flnm):
     fl = open(flnm,'rU')
     pm = pickle.load(fl)
@@ -216,3 +223,86 @@ def loadPathMaker(flnm):
     if pm.compressed:
         pm.decompressPaths()
     return pm
+
+# Like the PathMaker class but does things on the fly rather than storing
+#  Used to slot into models that assume you have a PathMaker object creating paths
+class PseudoPathMaker(PathMaker):
+    def __init__(self, trial, kapv=KAPV_DEF, kapb=KAPB_DEF, kapm=KAPM_DEF, perr=PERR_DEF, npaths=None,
+                 pathdist=0.1, timelen=60., timeres=0.05, cpus=1, verbose=False, allow_timeout=False):
+        self.trial=trial
+        self.kv = kapv
+        self.kb = kapb
+        self.km = kapm
+        self.pe = perr
+        self.time = timelen
+        self.res = timeres
+        self.pdist = pathdist
+        self.timeout = allow_timeout
+        self.compressed = False
+
+        # Figure out the maximum time
+        tab = self.trial.makeTable()
+        self._maxt = 0
+        while tab.step(self.pdist) is None:
+            self._maxt += self.pdist
+
+    def makePaths(self, verbose=False):
+        print "Making paths not needed for PseudoPathMaker"
+
+    def makePathSingTime(self,t,verbose = False):
+        print "Making paths not needed for PseudoPathMaker"
+
+    def compressPaths(self):
+        print "PsuedoPathMaker paths are not compressable"
+
+    def decompressPaths(self):
+        print "PsuedoPathMaker paths are not compressable"
+
+    def save(self, flnm, docompress=True):
+        with open(flnm, 'w') as ofl:
+            pickle.dump(self, fl, protocol=2)
+
+    def _make_pseudo_path(self, tab):
+        ntab = makeNoisy(tab, self.kv, self.kb, self.km , self.pe)
+        o, p, b = ntab.simulate(self.time, self.res, True, True)
+
+        while ((o is TIMEUP and not self.timeout) or o is OUTOFBOUNDS or ntab.balls.bounces > 255):
+            del ntab
+            ntab = makeNoisy(tab, self.kv, self.kb, self.km , self.pe)
+            o, p, b = ntab.simulate(self.time, self.res, True, True)
+
+        return o, p, b
+
+    def _advance_table(self, time):
+        tab = self.trial.makeTable()
+        if time > 0:
+            tab.step(time)
+        return tab
+
+    def getOutcomes(self,time,n):
+        tab = self._advance_table(time)
+        pths = [self._make_pseudo_path(tab) for _ in range(n)]
+        return zip(*pths)[0]
+
+    def getPaths(self, time, n):
+        tab = self._advance_table(time)
+        pths = [self._make_pseudo_path(tab) for _ in range(n)]
+        return zip(*pths)[1]
+
+    def getPathsAndOutcomes(self,time,n):
+        tab = self._advance_table(time)
+        pths = [self._make_pseudo_path(tab) for _ in range(n)]
+        return [p[:2] for p in pths]
+
+    def getOutcomesAndBounces(self,time,n):
+        tab = self._advance_table(time)
+        pths = [self._make_pseudo_path(tab) for _ in range(n)]
+        return [(p[0], p[2]) for p in pths]
+
+    def getSinglePath(self, time):
+        tab = self._advance_table(time)
+        return Path(tb, self.kv, self.kb, self.km, self.pe, self.time, self.res, allow_timeout=self.timeout)
+
+    def _get_max_time(self):
+        return self._maxt
+    max_time = property(_get_max_time)
