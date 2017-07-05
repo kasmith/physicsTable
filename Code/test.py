@@ -13,8 +13,8 @@ if __name__ == '__main__':
         print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER, LIMTIME'
         sys.exit(0)
     
-    if not args[1] in ['BASIC','NOISY','GRAVITY','SPEED','PATHFILTER', 'LIMTIME']:
-        print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER, LIMTIME'
+    if not args[1] in ['BASIC','NOISY','GRAVITY','SPEED','PATHFILTER', 'LIMTIME','NOISYBOUNCE']:
+        print 'test.py takes one argument; valid tests are BASIC, NOISY, GRAVITY, SPEED, PATHFILTER, LIMTIME, NOISYBOUNCE'
         sys.exit(0)
         
     
@@ -125,6 +125,15 @@ if __name__ == '__main__':
                         elif e.type == KEYDOWN and e.key == K_ESCAPE: pg.quit(); sys.exit(0)
                         elif e.type == MOUSEBUTTONDOWN: running = False
 
+    elif args[1] == "NOISYBOUNCE":
+        sc = pg.display.set_mode((600,400))
+        tr = SimpleTrial('test', (600, 400))
+        tr.addWall((100,100), (600,400))
+        tr.addBall((50,300),(50,-280),10)
+        tr.addGoal((550,0),(600,100),REDGOAL,RED)
+        tab = tr.makeTable()
+        ntab = makeNoisy(tab, None, 30., None, None, constrained_bounce=True)
+        ntab.demonstrate()
 
     pg.quit()
     sys.exit(0)
