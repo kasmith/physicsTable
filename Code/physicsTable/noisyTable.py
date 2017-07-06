@@ -79,7 +79,7 @@ class NoisyTable(SimpleTable):
             elif np.pi/2. < vang < np.pi:
                 bounds = (np.pi/2., np.pi)
             elif np.pi < vang < np.pi*1.5:
-                bounds = (np.pi/2., np.pi)
+                bounds = (np.pi, np.pi * 1.5)
             elif np.pi*1.5 < vang < np.pi*2.:
                 bounds = (np.pi * 1.5, np.pi*2.)
             else:

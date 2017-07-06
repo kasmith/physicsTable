@@ -131,6 +131,7 @@ if __name__ == '__main__':
         tr.addWall((100,100), (600,400))
         tr.addBall((50,300),(50,-280),10)
         tr.addGoal((550,0),(600,100),REDGOAL,RED)
+        tr.addWall((100,0),(200,20))
         tab = tr.makeTable()
         ntab = makeNoisy(tab, None, 30., None, None, constrained_bounce=True)
         ntab.demonstrate()
