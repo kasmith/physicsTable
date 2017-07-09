@@ -49,15 +49,15 @@ def loadPaths(trial,kapv,kapb,kapm,perr,nsims=200,path = '.',verbose=False):
 
 class Path(object):
     def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True,verbose = False, allow_timeout=False,
-                 constrained_bounce=False):
-        ntab = makeNoisy(tab,kv,kb,km,pe, constrained_bounce=constrained_bounce)
+                 constrained_bounce=False, constrained_move=False):
+        ntab = makeNoisy(tab,kv,kb,km,pe, constrained_bounce=constrained_bounce, constrained_move=constrained_move)
         nbads = 0
         self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         # Make sure that we get a valid goal
         while ((self.o is TIMEUP and not allow_timeout) or self.o is OUTOFBOUNDS or \
                            ntab.balls.bounces > 255) and enforcegoal:
             del ntab
-            ntab = makeNoisy(tab,kv,kb,km,pe)
+            ntab = makeNoisy(tab,kv,kb,km,pe, constrained_bounce=constrained_bounce, constrained_move=constrained_move)
             nbads += 1
             self.o, self.p, self.b = ntab.simulate(tl,ts,True,True)
         self.maxtime = len(self.p)*ts
@@ -119,7 +119,7 @@ class PathMaker(object):
 
     def __init__(self,trial, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, npaths = 100, \
                  pathdist = .1, timelen = 60., timeres = 0.05, cpus = cpu_count(),verbose = False, allow_timeout=False,
-                 constrained_bounce=False):
+                 constrained_bounce=False, constrained_move=False):
         self.trial = trial
         self.npaths = npaths
         self.kv = kapv
@@ -133,6 +133,7 @@ class PathMaker(object):
         self.compressed = False
         self.timeout = allow_timeout
         self.cons_bounce = constrained_bounce
+        self.cons_move = constrained_move
 
         self.makePaths(verbose)
 
@@ -159,7 +160,8 @@ class PathMaker(object):
         while tab.tm < t:
             tab.step(self.pdist)
         return map(lambda x: Path(tab,self.kv,self.kb,self.km,self.pe,self.time,self.res,verbose=verbose,\
-                                  allow_timeout=self.timeout, constrained_bounce=self.cons_bounce), range(self.npaths))
+                                  allow_timeout=self.timeout, constrained_bounce=self.cons_bounce,
+                                  constrained_move=self.cons_move), range(self.npaths))
 
     def compressPaths(self):
         if not self.compressed:
@@ -236,7 +238,7 @@ def loadPathMaker(flnm):
 class PseudoPathMaker(PathMaker):
     def __init__(self, trial, kapv=KAPV_DEF, kapb=KAPB_DEF, kapm=KAPM_DEF, perr=PERR_DEF, npaths=None,
                  pathdist=0.1, timelen=60., timeres=0.05, cpus=1, verbose=False, allow_timeout=False,
-                 constrained_bounce=False):
+                 constrained_bounce=False, constrained_move=False):
         self.trial=trial
         self.kv = kapv
         self.kb = kapb
@@ -248,6 +250,7 @@ class PseudoPathMaker(PathMaker):
         self.timeout = allow_timeout
         self.compressed = False
         self.cons_bounce = constrained_bounce
+        self.cons_move = constrained_move
 
         # Figure out the maximum time
         tab = self.trial.makeTable()
@@ -272,12 +275,14 @@ class PseudoPathMaker(PathMaker):
             pickle.dump(self, fl, protocol=2)
 
     def _make_pseudo_path(self, tab):
-        ntab = makeNoisy(tab, self.kv, self.kb, self.km , self.pe)
+        ntab = makeNoisy(tab, self.kv, self.kb, self.km , self.pe, constrained_bounce=self.cons_bounce,
+                         constrained_move=self.cons_move)
         o, p, b = ntab.simulate(self.time, self.res, True, True)
 
         while ((o is TIMEUP and not self.timeout) or o is OUTOFBOUNDS or ntab.balls.bounces > 255):
             del ntab
-            ntab = makeNoisy(tab, self.kv, self.kb, self.km , self.pe, constrained_bounce=self.cons_bounce)
+            ntab = makeNoisy(tab, self.kv, self.kb, self.km , self.pe, constrained_bounce=self.cons_bounce,
+                             constrained_move=self.cons_move)
             o, p, b = ntab.simulate(self.time, self.res, True, True)
 
         return o, p, b
@@ -316,7 +321,7 @@ class PseudoPathMaker(PathMaker):
     def getSinglePath(self, time):
         tab = self._advance_table(time)
         return Path(tab, self.kv, self.kb, self.km, self.pe, self.time, self.res, allow_timeout=self.timeout,
-                    constrained_bounce=self.cons_bounce)
+                    constrained_bounce=self.cons_bounce, constrained_move=self.cons_move)
 
     def _get_max_time(self):
         return self.maxtm

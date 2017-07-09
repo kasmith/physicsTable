@@ -24,13 +24,15 @@ def velAngle(vx,vy):
 
 class NoisyTable(SimpleTable):
     
-    def __init__(self, dims, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF, constrained_bounce=False, *args, **kwds):
+    def __init__(self, dims, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,
+                 constrained_bounce=False, constrained_move=False, *args, **kwds):
                      
                      self.kapv = kapv
                      self.kapb = kapb
                      self.kapm = kapm
                      self.perr = perr
                      self.cons_bounce = constrained_bounce
+                     self.cons_move = constrained_move
                      super(NoisyTable, self).__init__(dims, *args, **kwds)
 
     def __del__(self):
@@ -62,7 +64,20 @@ class NoisyTable(SimpleTable):
         if kappa:
             v = ball.getvel()
             vang, vmag = velAngle(v[0], v[1])
-            newang = np.random.vonmises(vang, kappa)
+            newang = np.random.vonmises(vang, kappa) % (2*np.pi)
+            if self.cons_move:
+                if 0 < vang < np.pi / 2.:
+                    bounds = (0, np.pi / 2.)
+                elif np.pi / 2. < vang < np.pi:
+                    bounds = (np.pi / 2., np.pi)
+                elif np.pi < vang < np.pi * 1.5:
+                    bounds = (np.pi, np.pi * 1.5)
+                elif np.pi * 1.5 < vang < np.pi * 2.:
+                    bounds = (np.pi * 1.5, np.pi * 2.)
+                else:
+                    raise Exception("Angle outside of 0, 2pi")
+                while not (bounds[0] < newang < bounds[1]):
+                    newang = np.random.vonmises(vang, kappa) % (2*np.pi)
             ball.setvel( (vmag * np.cos(newang), vmag * np.sin(newang)) )
 
     # Special case of wall collision -- doesn't allow ball to reverse course
@@ -160,21 +175,27 @@ class NoisyMultiTable(BasicTable):
 
         
 def makeNoisy(table, kapv = KAPV_DEF, kapb = KAPB_DEF, kapm = KAPM_DEF, perr = PERR_DEF,paddlereturn = SUCCESS,
-              straddlepaddle = True, constrained_bounce=False):
+              straddlepaddle = True, constrained_bounce=False, constrained_move=False):
 
     sttype = type(table) == SimpleTable
 
     try:
         import pygame
         if sttype:
-            ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, constrained_bounce, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+            ntab = NoisyTable(table.dim, kapv, kapb, kapm, perr, constrained_bounce, constrained_move,
+                              table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen,
+                              table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
         else:
-            ntab = NoisyMultiTable(table.dim, kapv, kapb, kapm, perr, constrained_bounce, table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen, table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
+            ntab = NoisyMultiTable(table.dim, kapv, kapb, kapm, perr, constrained_bounce, constrained_move,
+                                   table.stored_closed_ends, table.bk_c, table.dballrad, table.dballc, table.dpadlen,
+                                   table.dwallc, table.doccc, table.dpadc, table.act, table.stored_soffset)
     except:
         if sttype:
-            ntab = NoisyTable(table.dim,kapv,kapb,kapm,perr,constrained_bounce, table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
+            ntab = NoisyTable(table.dim,kapv,kapb,kapm,perr,constrained_bounce, constrained_move,
+                              table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
         else:
-            ntab = NoisyMultiTable(table.dim,kapv,kapb,kapm,perr,constrained_bounce, table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
+            ntab = NoisyMultiTable(table.dim,kapv,kapb,kapm,perr,constrained_bounce,constrained_move,
+                                   table.stored_closed_ends,table.dballrad,table.dpadlen,table.act)
     ntab.set_timestep(table.basicts)
     for w in table.walls: 
         if isinstance(w, AbnormWall): ntab.addAbnormWall(w.poly.get_vertices(), w.col, w.poly.elasticity)
