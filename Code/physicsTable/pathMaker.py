@@ -47,6 +47,9 @@ def loadPaths(trial,kapv,kapb,kapm,perr,nsims=200,path = '.',verbose=False):
         pm = loadPathMaker(trpth)
     return pm
 
+def _sample_w_rep(dat, n):
+    return [dat[random.randint(0,len(dat)-1)] for _ in xrange(n)]
+
 class Path(object):
     def __init__(self,tab,kv,kb,km,pe,tl,ts,enforcegoal = True,verbose = False, allow_timeout=False,
                  constrained_bounce=False, constrained_move=False):
@@ -113,6 +116,17 @@ class Path(object):
         if i >= len(self.p):
             return self.p[-1]
         return self.p[i]
+
+    def getbounce(self,t):
+        if self.p is None:
+            self.decompress()
+        used_t = t - self.initt
+        if used_t > self.tl:
+            return None
+        i = int(used_t/self.ts)
+        if i >= len(self.b):
+            return self.maxbounce
+        return self.b[i]
 
 
 class PathMaker(object):
@@ -190,33 +204,48 @@ class PathMaker(object):
         fl.close()
 
     # Simple way of pulling out a few outcomes and/or paths
-    def getOutcomes(self,time,n):
+    def getOutcomes(self,time,n,replace=False):
         pths = self.paths[str(float(time))]
-        rs = random.sample(pths,n)
+        if replace:
+            rs = _sample_w_rep(pths, n)
+        else:
+            rs = random.sample(pths,n)
         return [r.o for r in rs]
 
-    def getPaths(self,time,n):
+    def getPaths(self,time,n, replace=False):
         pths = self.paths[str(float(time))]
-        rs = random.sample(pths,n)
+        if replace:
+            rs = _sample_w_rep(pths, n)
+        else:
+            rs = random.sample(pths,n)
         return [r.p for r in rs]
 
-    def getPathsAndOutcomes(self,time,n):
+    def getPathsAndOutcomes(self,time,n, replace=False):
         pths = self.paths[str(float(time))]
-        rs = random.sample(pths,n)
+        if replace:
+            rs = _sample_w_rep(pths, n)
+        else:
+            rs = random.sample(pths,n)
         return [(r.o,r.p) for r in rs]
 
     def getSinglePath(self, time):
         pths = self.paths[str(float(time))]
         return random.choice(pths)
 
-    def getOutcomesAndBounces(self,time,n):
+    def getOutcomesAndBounces(self,time,n, replace=False):
         pths = self.paths[str(float(time))]
-        rs = random.sample(pths,n)
+        if replace:
+            rs = _sample_w_rep(pths, n)
+        else:
+            rs = random.sample(pths,n)
         return [(r.o,r.b) for r in rs]
 
-    def getOutcomesBouncesTime(self, time, n):
+    def getOutcomesBouncesTime(self, time, n, replace=False):
         pths = self.paths[str(float(time))]
-        rs = random.sample(pths, n)
+        if replace:
+            rs = _sample_w_rep(pths, n)
+        else:
+            rs = random.sample(pths,n)
         return [(r.o, r.b, len(r.p)*self.pdist) for r in rs]
 
     # Get maximum time allowable

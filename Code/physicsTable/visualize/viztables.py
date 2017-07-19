@@ -13,6 +13,11 @@ import pygame as pg
 from pygame.constants import *
 import numpy as np
 import sys
+import os
+import subprocess
+import shlex
+import shutil
+import warnings
 
 
 # Duck punching the BasicTable
@@ -227,7 +232,7 @@ def btmakeMovie(self, moviename, outputdir = '.', fps = 20, removeframes = True,
         shutil.rmtree(pthnm)
 
     return True
-BasicTable.makeMove = btmakeMovie
+SimpleTable.makeMovie = btmakeMovie
 
 # Duck punch the simple table
 def stdraw(self, stillshow = False):
@@ -259,5 +264,6 @@ def stdrawPath(self, pathcl = None):
     sc = self.draw()
     r, p = self.simulate(return_path = True)
     pg.draw.lines(sc,pathcl, False, p)
+
     return sc
 SimpleTable.drawPath = stdrawPath
