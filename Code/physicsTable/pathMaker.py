@@ -163,7 +163,7 @@ class PathMaker(object):
         ntms = int(np.ceil(maxtm / self.pdist))
         tms = [self.pdist*t for t in range(ntms)]
         def f(t): return(self.makePathSingTime(t,verbose))
-        if pths > 1:
+        if self.ncpu > 1:
             pths = async_map(f,tms,self.ncpu)
         else:
             pths = map(f,tms) # PUT async_map BACK!!!!
