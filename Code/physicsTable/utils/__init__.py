@@ -1,7 +1,7 @@
 
 
 __all__ = ['mvstdnormcdf', 'mvnormcdf', 'SimpleSPSA','async_map','apply_async','euclidist',
-           'MakeSmoother','SmoothFromPre','SmoothNShift']
+           'MakeSmoother','SmoothFromPre','SmoothNShift', 'approx_eq']
 
 from mvncdf import mvstdnormcdf, mvnormcdf
 from SPSA import SimpleSPSA
@@ -13,3 +13,6 @@ def euclidist(p1, p2):
     dx = p1[0]-p2[0]
     dy = p1[1]-p2[1]
     return np.sqrt( dx*dx + dy*dy )
+
+def approx_eq(x, y, tol=1e-8):
+    return (abs(x - y) < tol)

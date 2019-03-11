@@ -14,7 +14,7 @@ from trials import *
 from simpleTable import *
 from noisyTable import *
 from multiprocessing import Pool, cpu_count
-from .utils import async_map, apply_async
+from .utils import async_map, apply_async, approx_eq
 import random, copy, os
 
 # Unsafe translation of a number between 0 and 256^2-1 to a two character
@@ -173,7 +173,7 @@ class PathMaker(object):
 
     def makePathSingTime(self,t,verbose = False):
         tab = self.trial.makeTable()
-        while tab.tm < t:
+        while tab.tm < (t - 1e-8): # Adjustment for rounding errors
             tab.step(self.pdist)
         return map(lambda x: Path(tab,self.kv,self.kb,self.km,self.pe,self.time,self.res,verbose=verbose,\
                                   allow_timeout=self.timeout, constrained_bounce=self.cons_bounce,
