@@ -250,6 +250,21 @@ class PathMaker(object):
             rs = random.sample(pths,n)
         return [(r.o, r.b, len(r.p)*self.pdist) for r in rs]
 
+    def combine_paths(self, pm2):
+        assert type(pm2) == PathMaker, "Can only combine two PathMakers"
+        checklist = (self.trial.name == pm2.trial.name and
+                     self.kv == pm2.kv and self.kb == pm2.kb and
+                     self.km == pm2.km and self.pe == pm2.pe and
+                     self.time == pm2.time and self.res == pm2.res and
+                     self.pdist == pm2.pdist)
+        
+        assert checklist, "Must combine PathMakers of the same trial and configuration"
+
+        self.npaths += pm2.npaths
+        for tm in self.paths.keys():
+            self.paths[tm] += pm2.paths[tm]
+
+
     # Get maximum time allowable
     def _get_max_time(self):
         return self.maxtm
